@@ -9,7 +9,7 @@ frozen rows and columns, server-side filters, totals, row actions, selection, do
 ![TypeScript](https://img.shields.io/badge/types-included-3178c6)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-![Table with hover actions, totals row and pagination](https://raw.githubusercontent.com/PandaTechAM/web-lib-panda-table/main/docs/table.jpg)
+![Table with hover actions, totals row and pagination](https://raw.githubusercontent.com/samvel97/web-lib-panda-table/main/docs/table.jpg)
 
 ## Features
 
@@ -23,7 +23,7 @@ frozen rows and columns, server-side filters, totals, row actions, selection, do
 - **Download** menu (XLSX / CSV) for checked rows or everything
 - Fully **typed** (`<Table<Order> />`), keyboard accessible controls, works with **React 18 and 19** and **MUI 5, 6 and 7**
 
-![Filters panel with a date range picker](https://raw.githubusercontent.com/PandaTechAM/web-lib-panda-table/main/docs/filters.jpg)
+![Filters panel with a date range picker](https://raw.githubusercontent.com/samvel97/web-lib-panda-table/main/docs/filters.jpg)
 
 ## Installation
 

@@ -1,4 +1,3 @@
-import dayjs, { type Dayjs } from 'dayjs'
 import { ColumnTypeEnums } from '../Models/table.enum'
 import { type ItemFields } from '../Models/table.models'
 
@@ -117,16 +116,6 @@ export const filterUiHelper = (ColumnType: string, ComparisonType: string) => {
   return 0
 }
 
-/**
- * Convert a filter value (Date, ISO string, Dayjs) into a value the date pickers accept.
- * Empty and unparsable input becomes `null` ("no date") instead of an Invalid Date.
- */
-export const toPickerDate = (value: unknown): Dayjs | null => {
-  if (value === null || value === undefined || value === '') return null
-  const date = dayjs(value as string | number | Date | Dayjs)
-  return date.isValid() ? date : null
-}
-
 export interface RangeValidationMessages {
   isEmpty: string
   onlyNumbers: string
@@ -223,11 +212,4 @@ export const handleEnumColumns = (option: ItemFields[]) => {
       return el
     }
   })
-}
-
-export function hasScroll() {
-  const element = document.getElementsByClassName('G-data-scroll')[0]
-  if (!element) return
-  // element.scrollHeight > element.clientHeight ||
-  return element.scrollWidth > element.clientWidth
 }

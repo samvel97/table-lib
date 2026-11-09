@@ -1,4 +1,5 @@
 @use 'sass:meta';
+@use '../ui/ui';
 
 // Public, global flex helpers (`G-flex`, `G-center`, ...): unchanged from v7, apps rely on them.
 @include meta.load-css('utilities');

@@ -15,12 +15,14 @@ import {
 import { filterColumns, filtersTypes, translations } from './config'
 import { generateOrders, type Order } from './data'
 
-const ALL_ORDERS = generateOrders(57)
+const ALL_ORDERS = generateOrders(5000)
 
 const PAGE_SIZES: IPageSizes[] = [
   { id: 1, count: 10 },
   { id: 2, count: 25 },
   { id: 3, count: 50 },
+  { id: 4, count: 1000 },
+  { id: 5, count: 5000 },
 ]
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
@@ -72,6 +74,7 @@ export default function App() {
   const [filters, setFilters] = useState<ItemFields[]>([])
   const [log, setLog] = useState<string[]>([])
   const [isEmpty, setIsEmpty] = useState(false)
+  const [virtualized, setVirtualized] = useState(() => new URLSearchParams(location.search).has('virtual'))
 
   const record = (message: string) => setLog((previous) => [message, ...previous].slice(0, 6))
 
@@ -178,14 +181,22 @@ export default function App() {
           <h1>beautiful-react-table</h1>
           <p>Playground: sorting, filters, column customization, frozen rows, row actions, totals and pagination.</p>
         </div>
-        <label className='toggle'>
-          <input type='checkbox' checked={isEmpty} onChange={(event) => setIsEmpty(event.target.checked)} /> Empty state
-        </label>
+        <div className='toggles'>
+          <label className='toggle'>
+            <input type='checkbox' checked={virtualized} onChange={(event) => setVirtualized(event.target.checked)} />{' '}
+            Virtualized
+          </label>
+          <label className='toggle'>
+            <input type='checkbox' checked={isEmpty} onChange={(event) => setIsEmpty(event.target.checked)} /> Empty
+            state
+          </label>
+        </div>
       </header>
 
       <Table<Order>
         data={visibleRows}
         isLoadedData={false}
+        virtualized={virtualized}
         columnsConfigStructure={liveConfig}
         columnsHeaderStructure={columnsHeaderStructure}
         setColumnsConfigStructure={(next) => setColumnsConfigStructure(next)}

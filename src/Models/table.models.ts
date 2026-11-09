@@ -6,6 +6,14 @@ import { type ColumnTypeEnums } from './table.enum'
 export type TableIcon =
   ComponentType<SVGProps<SVGSVGElement>> | MemoExoticComponent<(props: SVGProps<SVGSVGElement>) => ReactElement>
 
+/** Options for `virtualized`. */
+export interface VirtualizationOptions {
+  /** Rows rendered above and below the visible area. Default: 10. */
+  overscan?: number
+  /** Initial row height guess in px; real heights are measured. Default: 32. */
+  estimateRowHeight?: number
+}
+
 /** Props of `<Table>`. Rows must have a unique `id`. */
 export interface IProps<T extends object> {
   // ── Data ────────────────────────────────────────────────────────────────
@@ -17,6 +25,11 @@ export interface IProps<T extends object> {
   columnsHeaderStructure: IColumnHeaderStructure
   /** Shows skeleton rows while `data` is empty. */
   isLoadedData?: boolean
+  /**
+   * Render only the rows near the visible area. Use it for large pages (hundreds of rows or more).
+   * Off by default: with it, off-screen rows are not in the DOM (browser find, printing and DOM-based tests see only visible rows).
+   */
+  virtualized?: boolean | VirtualizationOptions
   /** Rendered when there are no rows. */
   EmptyDataContainer?: ReactNode
   /** UI texts (checkbox, filters, pagination, customization, download). See the README for the shape. */

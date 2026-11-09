@@ -1,9 +1,8 @@
 import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
-import React from 'react'
-import { TextField } from '@mui/material'
+import { TextField } from '../../../../../ui/TextField'
 import { ColumnTypeEnums, type inputSize } from '../../../../../Models/table.enum'
 import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import { containsOnlyNumbers } from '../../../../../utils'
 interface IMultipleCHeck {
   item: IComparisonType
@@ -20,7 +19,6 @@ interface IMultipleCHeck {
 const TextInputField = ({
   item,
   advancedSettings,
-  inputSizes,
   isDisabled,
   filterTyping,
   columnName,
@@ -33,12 +31,12 @@ const TextInputField = ({
   const [isEnabled, setIsEnabled] = useState<boolean>(false)
   const [errMessage, setErrMessage] = useState<string>('')
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
     setErrMessage('')
 
     if (item.ColumnType === ColumnTypeEnums.TextCollection && !containsOnlyNumbers(value)) {
-      setErrMessage(translations?.filterAction.onlyNumbers || 'only numbers')
+      setErrMessage(translations?.filterAction?.onlyNumbers || 'only numbers')
       setValue(value)
       return
     }
@@ -53,12 +51,6 @@ const TextInputField = ({
   const handleCloseList = () => {
     setIsEnabled(false)
     setColumnName('')
-  }
-  const getError = (messageLength: number) => {
-    if (!isEnabled && messageLength) {
-      return true
-    }
-    return false
   }
 
   const errMessageText = (errMessage: string) => {
@@ -77,23 +69,19 @@ const TextInputField = ({
   })
 
   return (
-    <TextField
-      id={item.ColumnName}
-      label={item.key || item.ColumnName}
-      name={item.ColumnName}
-      disabled={columnName !== item.ColumnName && isDisabled}
-      value={value}
-      variant='outlined'
-      size={inputSizes}
-      error={getError(errMessage.length)}
-      onChange={handleChange}
-      onFocus={handleOpenList}
-      onBlur={handleCloseList}
-      helperText={errMessageText(errMessage)}
-      sx={{
-        width: advancedSettings ? columnsSizes : '100%',
-      }}
-    />
+    <div style={{ width: advancedSettings ? columnsSizes : '100%' }}>
+      <TextField
+        id={item.ColumnName}
+        label={item.key || item.ColumnName}
+        name={item.ColumnName}
+        disabled={columnName !== item.ColumnName && isDisabled}
+        value={value}
+        error={errMessageText(errMessage)}
+        onChange={handleChange}
+        onFocus={handleOpenList}
+        onBlur={handleCloseList}
+      />
+    </div>
   )
 }
 

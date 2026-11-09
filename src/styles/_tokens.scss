@@ -1,0 +1,33 @@
+@use 'sass:map';
+
+// Design tokens. Every value is read as `var(--brt-<name>, <default>)`, so an app can theme the table
+// from any ancestor, e.g. `:root { --brt-accent: #0f766e; }`, without fighting specificity.
+$defaults: (
+  'accent': #4844c5,
+  'accent-hover': #3b37a8,
+  'accent-soft': #ececfb,
+  'text': #1f2333,
+  'text-muted': #6b7183,
+  'border': #dfe3ea,
+  'border-strong': #c3cad6,
+  'surface': #ffffff,
+  'surface-muted': #f5f7fa,
+  'row-hover': #f3f5ff,
+  'danger': #d32f2f,
+  'radius': 8px,
+  'radius-sm': 6px,
+  'shadow': (
+    0 8px 24px rgb(16 24 40 / 12%),
+    0 2px 6px rgb(16 24 40 / 8%),
+  ),
+  'font-size': 14px,
+  'control-height': 38px,
+  'transition': 150ms ease,
+);
+
+@function t($name) {
+  @if not map.has-key($defaults, $name) {
+    @error 'Unknown design token: #{$name}';
+  }
+  @return var(--brt-#{$name}, #{map.get($defaults, $name)});
+}

@@ -1,21 +1,25 @@
-import { Button, Menu, ThemeProvider } from '@mui/material'
-import { useId, type MouseEvent, type ReactElement } from 'react'
+import { useId, type CSSProperties, type MouseEvent, type ReactElement } from 'react'
+import { autoUpdate, flip, offset, shift, useDismiss, useFloating, useInteractions, useRole } from '@floating-ui/react'
+import { FloatingLayer } from '../../ui/FloatingLayer'
 import './style.scss'
-import { theme } from '../../utils/muiTheme'
+
 interface IPopUp {
   children: ReactElement
   ActiveIcon?: any
   DisabledIcon?: any
   modalName?: string
-  style?: any
+  /** Extra styles for the trigger button. */
+  style?: CSSProperties
   checkedLink?: any
   item?: any
   open: boolean
-  anchorEl: any
-  handleClose: (e: MouseEvent<HTMLButtonElement>) => void
+  anchorEl: HTMLElement | null
+  handleClose: (event: MouseEvent<HTMLButtonElement>) => void
   handleClick: (event: MouseEvent<HTMLButtonElement>) => void
   getRowForDropdown?: (option: any) => void
 }
+
+/** Trigger button plus a floating menu anchored to it (select-all menu, columns, row links). */
 const PopUp = ({
   children,
   ActiveIcon,
@@ -34,75 +38,63 @@ const PopUp = ({
   const id = useId()
   const buttonId = `brt-popup-button-${id}`
   const menuId = `brt-popup-menu-${id}`
+  // Row dropdowns share one "checked" row; only the matching row's menu is open.
+  const isOpen = checkedLink && item ? checkedLink.id === item.id && open : open
+
+  const { refs, floatingStyles, context } = useFloating({
+    open: isOpen,
+    onOpenChange: (next, event) => {
+      if (!next) handleClose(event as unknown as MouseEvent<HTMLButtonElement>)
+    },
+    elements: { reference: anchorEl },
+    placement: 'bottom-start',
+    whileElementsMounted: autoUpdate,
+    middleware: [offset(6), flip(), shift({ padding: 8 })],
+  })
+  const dismiss = useDismiss(context)
+  const role = useRole(context, { role: 'menu' })
+  const { getFloatingProps } = useInteractions([dismiss, role])
+
   return (
     <>
-      <ThemeProvider theme={theme}>
-        <Button
-          id={buttonId}
-          aria-controls={open ? menuId : undefined}
-          aria-haspopup='true'
-          aria-expanded={open ? 'true' : undefined}
-          onClick={handleClick}
-          sx={
-            style
-              ? style
-              : {
-                  margin: 0,
-                  padding: '3px',
-                  minWidth: 15,
-                  border: 'none',
-                  backgroundColor: 'rgba(0,0,0,0)',
-                }
-          }
-        >
-          <div
-            className='G-center'
-            onClick={() => {
-              getRowForDropdown?.(item?.id)
-            }}
-          >
-            <div className='G-center G-popUp-icon'>
-              {ActiveIcon ? (
-                DisabledIcon ? (
-                  open ? (
-                    <ActiveIcon />
-                  ) : (
-                    <DisabledIcon />
-                  )
-                ) : (
-                  <ActiveIcon fill={!open ? '#4A4C56' : '#4844C5'} />
-                )
-              ) : null}
-            </div>
-            {modalName ? (
-              <div
-                style={{
-                  marginLeft: 8,
-                  color: open ? '#4844c5' : 'black',
-                  fontSize: 14,
-                  fontWeight: 400,
-                }}
-              >
-                {modalName}
-              </div>
-            ) : null}
-          </div>
-        </Button>
-      </ThemeProvider>
-      <Menu
-        id={menuId}
-        className='brt-root brt-popup-menu'
-        sx={{ '& .MuiMenu-list': { padding: 0 } }}
-        anchorEl={anchorEl}
-        open={checkedLink && item ? (checkedLink.id === item.id ? open : false) : open}
-        elevation={0}
-        onClose={handleClose}
-        MenuListProps={{
-          'aria-labelledby': buttonId,
+      <button
+        type='button'
+        id={buttonId}
+        aria-controls={isOpen ? menuId : undefined}
+        aria-haspopup='true'
+        aria-expanded={isOpen}
+        onClick={(event) => {
+          getRowForDropdown?.(item?.id)
+          handleClick(event)
         }}
+        className='brt-popup-trigger'
+        style={style}
       >
-        {children}
-      </Menu>
+        <span className='G-center G-popUp-icon'>
+          {ActiveIcon ? (
+            DisabledIcon ? (
+              isOpen ? (
+                <ActiveIcon />
+              ) : (
+                <DisabledIcon />
+              )
+            ) : (
+              <ActiveIcon fill={isOpen ? 'var(--brt-accent)' : 'currentColor'} />
+            )
+          ) : null}
+        </span>
+        {modalName ? <span className={`brt-popup-trigger__label ${isOpen ? 'is-open' : ''}`}>{modalName}</span> : null}
+      </button>
+      {isOpen ? (
+        <FloatingLayer
+          floatingRef={refs.setFloating}
+          style={floatingStyles}
+          className='brt-popup-menu'
+          props={{ id: menuId, 'aria-labelledby': buttonId, ...getFloatingProps() }}
+        >
+          {children}
+        </FloatingLayer>
+      ) : null}
     </>
   )
 }

@@ -1,6 +1,6 @@
 import { memo, useMemo, useState, type MouseEvent, type ReactElement } from 'react'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
-import { Button } from '@mui/material'
+import { Button } from '../../../ui/Button'
 import { StructureConfig } from '../../../Models/table.enum'
 import type { IColumnConfig, IColumnConfigStructure, IColumnHeaderStructure } from '../../../Models/table.models'
 import Checkbox from '../../../components/checkbox'
@@ -165,7 +165,7 @@ function ColumnsCustomizer<T extends object>({
           </div>
           {storeStructure && (
             <div style={{ padding: 8 }}>
-              <Button size='medium' fullWidth onClick={handleSave}>
+              <Button variant='contained' fullWidth onClick={handleSave}>
                 {texts?.actionButtonName || 'Save'}
               </Button>
             </div>

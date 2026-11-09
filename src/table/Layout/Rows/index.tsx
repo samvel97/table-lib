@@ -45,6 +45,7 @@ interface IRows<T extends object> {
   dragDropFreezeRow(option: T[]): void
   isCheckedRows(id: RowId): boolean
   isCheckedRows(id: RowId): boolean
+  virtualization?: { overscan: number; estimateRowHeight: number } | null
   getRowForDropdown(id: RowId): void
 }
 const Rows = forwardRef<any, IRows<any>>(
@@ -82,6 +83,7 @@ const Rows = forwardRef<any, IRows<any>>(
       handleCheck,
       dragDropFreezeRow,
       unFreezeRow,
+      virtualization,
     },
     ref,
   ) => {
@@ -150,6 +152,7 @@ const Rows = forwardRef<any, IRows<any>>(
           getRowForDropdown={getRowForDropdown}
           isCheckedRows={isCheckedRows}
           handleCheck={handleCheck}
+          virtualization={virtualization}
         />
       </>
     )

@@ -1,39 +1,12 @@
-.P-Filters {
-  .ForModal {
-    .MuiSvgIcon-root {
-      path {
-        color: #4844c5;
-      }
-    }
-  }
-  .MuiAutocomplete-root div.MuiAutocomplete-tag {
-    background-color: #dadaf3;
-    max-width: calc(100% - 50px);
-    justify-content: space-between;
-  }
-  .MuiChip-root .MuiChip-deleteIcon {
-    color: white;
-    font-size: 25px;
-  }
-  .MuiFormHelperText-root {
-    line-height: none !important;
-    margin-top: 0;
-  }
-  .MuiOutlinedInput-notchedOutline {
-    border-color: #ced8dd;
-  }
-  .MuiSvgIcon-root {
-    color: #acbcc3;
-  }
-}
-.date-picker {
-  .MuiOutlinedInput-notchedOutline {
-    border-color: red !important;
-  }
-}
+@use '../../../../../styles/tokens' as *;
 
-.filter-error {
-  color: #d32f2f;
-  font-size: 12px;
-  margin-top: 2px;
+// Filters panel list: one field per row with consistent spacing.
+.P-Filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  > li {
+    margin-top: 0 !important;
+  }
 }

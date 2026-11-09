@@ -1,15 +1,17 @@
-import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
-import { Autocomplete, Button, Checkbox, CircularProgress, Skeleton, TextField } from '@mui/material'
-import React, { Fragment, type SyntheticEvent, memo, useState } from 'react'
-// import Checkbox from "../../../../components/checkbox";
+import { memo, useState } from 'react'
 import { ColumnTypeEnums, type inputSize, numberFields } from '../../../../../Models/table.enum'
-import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
+import type { IComparisonType, ItemFields } from '../../../../../Models/table.models'
 import { containsOnlyNumbers } from '../../../../../utils'
+import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
+import { Button } from '../../../../../ui/Button'
+import { Combobox } from '../../../../../ui/Combobox'
 
 /** Values are requested 30 at a time; a full page means there may be more to load. */
 const FILTER_VALUES_PAGE_SIZE = 30
 
-interface IMultipleCHeck {
+type Value = string | number
+
+interface IMultipleCheck {
   columnsSizes: string
   advancedSettings: boolean
   item: IComparisonType
@@ -22,13 +24,14 @@ interface IMultipleCHeck {
   inputSizes: inputSize
   translations?: Record<string, any>
   filterColumns?: IComparisonType[]
-  setCheckedItemsLocaly(options: (string | number)[], closeCallBack?: () => void): void
-  handleSelectItems: (option: (string | number)[], isClosed: boolean, fieldName?: string) => void
+  setCheckedItemsLocaly(options: Value[], closeCallBack?: () => void): void
+  handleSelectItems: (option: Value[], isClosed: boolean, fieldName?: string) => void
   setColumnName: (name: string) => void
   handleChangeValue: (value: string) => void
   handleChangePagePerFilterField?(option: ItemFields): void
 }
 
+/** Multi-value filter: type to search values, check several, applied when the field loses focus. */
 const MultipleCheck = ({
   columnsSizes,
   item,
@@ -39,117 +42,83 @@ const MultipleCheck = ({
   isLoadingFilters,
   isDisabled,
   perColumnTotalCount,
-  inputSizes,
   translations,
-  filterColumns,
   setCheckedItemsLocaly,
   handleSelectItems,
   setColumnName,
   handleChangePagePerFilterField,
   handleChangeValue,
-}: IMultipleCHeck) => {
-  const emptyValue = translations?.filterAction.blank || 'Blank'
-  const [checkedItems, setCheckedItems] = useState<(string | number)[]>([])
+}: IMultipleCheck) => {
+  const emptyValue = translations?.filterAction?.blank || 'Blank'
+  const [checkedItems, setCheckedItems] = useState<Value[]>([])
+  const [isOpened, setIsOpened] = useState(false)
+  const [inputValue, setInputValue] = useState('')
+  const [errMessage, setErrMessage] = useState('')
+  const isActiveColumn = item.ColumnName === columnName
 
-  const [isOpened, setIsOpened] = useState<boolean>(false)
-  const [val, setVal] = useState<string>('')
-  const [errMessage, setErrMessage] = useState<string>('')
-
-  const checkList = () => {
-    if (item.ColumnName === columnName && perColumnListForFilters && errMessage === '') {
-      const list =
-        perColumnListForFilters.includes('') && perColumnListForFilters.includes(null)
-          ? perColumnListForFilters.slice(1, -1)
-          : perColumnListForFilters
-
-      if (item.ColumnType === ColumnTypeEnums.EncryptedData) {
-        const drawList = typeof list[0] === 'string' ? list : []
-
-        return val ? drawList : checkedItems
-      } else {
-        return list.map((item) => (item === null || item === '' ? emptyValue : item))
-      }
-    } else return []
-  }
-  const onChange = (event: React.SyntheticEvent<Element, Event>, newInputValue?: any) => {
-    if (numberFields.includes(item.ColumnType) && !containsOnlyNumbers(newInputValue)) {
-      setErrMessage(translations?.filterAction.onlyNumbers || 'only numbers')
-      setVal(newInputValue)
-
-      return
+  /** Options for the open column; `''` and `null` values are shown as "Blank". */
+  const options = ((): Value[] => {
+    if (!isActiveColumn || !perColumnListForFilters || errMessage) return []
+    const list =
+      perColumnListForFilters.includes('') && perColumnListForFilters.includes(null)
+        ? perColumnListForFilters.slice(1, -1)
+        : perColumnListForFilters
+    if (item.ColumnType === ColumnTypeEnums.EncryptedData) {
+      // Encrypted values can only be matched exactly: show results only while searching.
+      const drawList = typeof list[0] === 'string' ? list : []
+      return inputValue ? drawList : checkedItems
     }
-    if (item.ColumnType === ColumnTypeEnums.EncryptedData && !newInputValue) {
-      setErrMessage('')
-      setVal(newInputValue)
+    return list.map((value) => (value === null || value === '' ? emptyValue : value))
+  })()
+
+  const toRequestValues = (values: Value[]) => values.map((value) => (value === emptyValue ? '' : value))
+
+  const isEqual = (option: Value, value: Value) => {
+    const comparable = numberFields.includes(item.ColumnType) && value !== emptyValue ? +value : value
+    return option === comparable
+  }
+  const isSelected = (option: Value) => checkedItems.some((value) => isEqual(option, value))
+
+  const selectValues = (values: Value[]) => {
+    setCheckedItems(values)
+    if (!isOpened) handleSelectItems(toRequestValues(values), false)
+    setCheckedItemsLocaly(toRequestValues(values))
+  }
+
+  const handleInputChange = (text: string) => {
+    setInputValue(text)
+    if (numberFields.includes(item.ColumnType) && !containsOnlyNumbers(text)) {
+      setErrMessage(translations?.filterAction?.onlyNumbers || 'Only numbers')
       return
     }
     setErrMessage('')
-    handleChangeValue(newInputValue)
-    setVal(newInputValue)
+    if (item.ColumnType === ColumnTypeEnums.EncryptedData && !text) return
+    handleChangeValue(text)
   }
-  const selectValue = (event: SyntheticEvent<Element, Event>, value: (string | number)[]) => {
-    setCheckedItems(value)
-    const newValues: (number | string)[] = value.map((elem: number | string) => {
-      return elem === emptyValue ? '' : elem
-    })
-    if (!isOpened) {
-      handleSelectItems(newValues, false)
-    }
-    setCheckedItemsLocaly(newValues)
+
+  const handleOpen = () => {
+    setErrMessage('')
+    if (isDisabled) return
+    if (item.ColumnType !== ColumnTypeEnums.EncryptedData) handleSelectItems([], true, item.ColumnName)
+    setColumnName(item.ColumnName)
+    setIsOpened(true)
   }
-  const handleOpenList = () => {
-    if (!isDisabled) {
-      if (item.ColumnType !== ColumnTypeEnums.EncryptedData) handleSelectItems([], true, item.ColumnName)
-      setColumnName(item.ColumnName)
-      setIsOpened(true)
-    }
-  }
-  const handleCloseList = () => {
+
+  const handleClose = () => {
+    setErrMessage('')
     setColumnName('')
-    setVal('')
+    setInputValue('')
     setIsOpened(false)
+    handleSelectItems(toRequestValues(checkedItems), false, item.ColumnName)
+  }
 
-    const newValues: (number | string)[] = checkedItems.map((elem: string | number) => {
-      return elem === emptyValue ? '' : elem
-    })
-
-    handleSelectItems(newValues, false, item.ColumnName)
-  }
-  const getLabel = (options: string | number | null) => {
-    if (typeof options !== 'string') {
-      return options + ''
-    }
-    return options as string
-  }
-  const isEqual = (option: string | number | null, value: string | number) => {
-    let numericValue: string | number | null = value
-    if (numberFields.includes(item.ColumnType) && numericValue !== emptyValue) {
-      numericValue = +value
-    }
-    if (option === numericValue) {
-      return true
-    }
-    return false
-  }
-  const isEmpty = () => {
-    if (item.ColumnName === columnName && !isLoadingFilters && !perColumnListForFilters?.length) {
-      if (item.ColumnType !== ColumnTypeEnums.Text && item.ColumnType !== ColumnTypeEnums.TikoType) {
-        if (item.ColumnType === ColumnTypeEnums.EncryptedData) {
-          if (val.length) return true
-        } else if (item.ColumnType === ColumnTypeEnums.Base36Id) {
-          return true
-        } else {
-          if (containsOnlyNumbers(val)) return true
-        }
-      } else {
-        return true
-      }
-    }
-    return false
-  }
-  const drawOptionLabel = (option: string | number) => {
-    return option
-  }
+  const showsEmptyMessage = (() => {
+    if (!isActiveColumn || isLoadingFilters || perColumnListForFilters?.length) return false
+    if (item.ColumnType === ColumnTypeEnums.Text || item.ColumnType === ColumnTypeEnums.TikoType) return true
+    if (item.ColumnType === ColumnTypeEnums.EncryptedData) return inputValue.length > 0
+    if (item.ColumnType === ColumnTypeEnums.Base36Id) return true
+    return containsOnlyNumbers(inputValue)
+  })()
 
   const nextPageOption: ItemFields = {
     PropertyName: columnName,
@@ -160,6 +129,7 @@ const MultipleCheck = ({
     TypeForUi: 'GreaterThan',
     ColumnType: item.ColumnType,
   }
+
   // Show the applied filter values when the filter changes.
   useSyncOnChange(filterTyping, (filter) => {
     if (item.ColumnName !== filter.PropertyName) return
@@ -168,7 +138,7 @@ const MultipleCheck = ({
       item.ColumnType === ColumnTypeEnums.TikoType ||
       item.ColumnType === ColumnTypeEnums.Base36Id
     setCheckedItems(
-      filter.CheckedItems.map((value: number | string) => {
+      filter.CheckedItems.map((value: Value) => {
         if (value === '') return emptyValue
         return keepsType ? value : String(value)
       }),
@@ -176,142 +146,40 @@ const MultipleCheck = ({
   })
 
   return (
-    <div
-      style={{
-        width: advancedSettings ? columnsSizes : '100%',
-        position: 'relative',
-      }}
-    >
-      {isOpened ? (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, )',
-            zIndex: 999,
-          }}
-        ></div>
-      ) : null}
-      <Autocomplete
-        multiple
+    <div style={{ width: advancedSettings ? columnsSizes : '100%' }}>
+      <Combobox<Value>
+        label={item.key || item.ColumnName}
         open={isOpened}
-        id={item.ColumnName}
-        limitTags={advancedSettings ? 1 : 2}
-        options={checkList()}
-        disabled={isDisabled && item.ColumnName !== columnName}
-        disableCloseOnSelect
-        onInputChange={(event, newInputValue) => onChange(event, newInputValue)}
-        onChange={selectValue}
-        getOptionLabel={getLabel}
-        clearOnEscape
-        value={checkedItems}
-        inputValue={val}
-        isOptionEqualToValue={isEqual}
-        freeSolo
-        size={inputSizes}
-        sx={{ fontSize: '8px' }}
-        filterOptions={(options) => options}
-        renderOption={({ key, ...optionProps }, option, { selected }) => {
-          return (
-            <Fragment key={key}>
-              <li
-                {...optionProps}
-                style={{
-                  marginLeft: 5,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  minHeight: 40,
-                  borderBottom: option === emptyValue ? '1px solid silver' : 'none',
-                }}
-              >
-                {item.ColumnName === columnName && isLoadingFilters ? (
-                  <div style={{ width: '100%' }}>
-                    <Skeleton />
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ textAlign: 'start' }}>{drawOptionLabel(option)}</div>
-                    <Checkbox
-                      checked={selected}
-                      sx={{
-                        color: '#ACBCC3',
-                      }}
-                    />
-                  </>
-                )}
-              </li>
-              {option === perColumnListForFilters?.at(-1) ? (
-                <li className='G-center' role='presentation' style={{ width: '100%' }}>
-                  {perColumnTotalCount === FILTER_VALUES_PAGE_SIZE ? (
-                    <Button
-                      className='G-center'
-                      size='large'
-                      style={{
-                        margin: '0 16px',
-                        width: 'auto',
-                        backgroundColor: 'white',
-                        color: 'black',
-                        border: 'none',
-                      }}
-                      onClick={() => handleChangePagePerFilterField?.(nextPageOption)}
-                    >
-                      {translations?.filterAction.loadMore || 'Load more'}
-                    </Button>
-                  ) : null}
-                </li>
-              ) : null}
-            </Fragment>
+        disabled={isDisabled && !isActiveColumn}
+        inputValue={inputValue}
+        onInputChange={handleInputChange}
+        options={options}
+        getOptionLabel={String}
+        isSelected={isSelected}
+        onToggle={(option) =>
+          selectValues(
+            isSelected(option) ? checkedItems.filter((value) => !isEqual(option, value)) : [...checkedItems, option],
           )
-        }}
-        renderInput={(params) => (
-          <TextField
-            name={item.ColumnName}
-            onFocus={() => {
-              setErrMessage('')
-              handleOpenList()
-            }}
-            onBlur={() => {
-              setErrMessage('')
-              handleCloseList()
-            }}
-            error={!!errMessage}
-            helperText={errMessage}
-            {...params}
-            label={item.key || item.ColumnName}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {item.ColumnName === columnName && isLoadingFilters && <CircularProgress color='inherit' size={20} />}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
+        }
+        selected={checkedItems}
+        onRemove={(option) => selectValues(checkedItems.filter((value) => value !== option))}
+        onAddCustom={(text) => selectValues([...checkedItems, text])}
+        limitTags={advancedSettings ? 1 : 2}
+        onFocus={handleOpen}
+        onBlur={handleClose}
+        loading={isActiveColumn && isLoadingFilters}
+        error={errMessage}
+        showCheckbox
+        emptyText={showsEmptyMessage ? translations?.filterAction?.emptyFieldData || 'Empty data' : null}
+        optionClassName={(option) => (option === emptyValue ? 'brt-option--separated' : undefined)}
+        footer={
+          options.length && perColumnTotalCount === FILTER_VALUES_PAGE_SIZE ? (
+            <Button fullWidth onClick={() => handleChangePagePerFilterField?.(nextPageOption)}>
+              {translations?.filterAction?.loadMore || 'Load more'}
+            </Button>
+          ) : null
+        }
       />
-      {isEmpty() ? (
-        <div
-          className='G-align-center G-shadow-around'
-          style={{
-            borderRadius: 4,
-            height: 56,
-            padding: 15,
-            color: 'silver',
-            position: 'absolute',
-            top: filterColumns?.at(-1)?.ColumnName === item.ColumnName ? -55 : 40,
-            backgroundColor: 'white',
-            opacity: 1,
-            zIndex: 888888,
-            width: '100%',
-          }}
-        >
-          {translations?.filterAction.emptyFieldData || 'Empty data'}
-        </div>
-      ) : null}
     </div>
   )
 }

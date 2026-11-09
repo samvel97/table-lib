@@ -1,5 +1,4 @@
-import { Autocomplete, TextField } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { ColumnTypeEnums, filterTypesUiHelper, type inputSize, numberFields } from '../../../../Models/table.enum'
 import { type IComparisonType, type ISelect, type ItemFields } from '../../../../Models/table.models'
 import { filterUiHelper } from '../../../../utils'
@@ -10,6 +9,7 @@ import MultipleCheck from './UiTypes/MultipleCheck'
 import MultipleSelectCheckmarks from './UiTypes/MultipleSelectCheckmarks'
 import PickDate from './UiTypes/PickDate'
 import TextInputField from './UiTypes/TextInputField'
+import './UiTypes/style.scss'
 
 interface IPerField {
   item: IComparisonType
@@ -58,6 +58,7 @@ const APIFilter = ({
     ColumnType: item.ColumnType,
   })
   const [columnName, setColumnName] = useState<string>('')
+  const operatorId = useId()
   const uiType = filterUiHelper(typeElem.ColumnType, filterTyping.TypeForUi)
   const handlePropertyName = (value?: string) => {
     const typesList = [ColumnTypeEnums.TextCollection, ColumnTypeEnums.NumberCollection]
@@ -221,8 +222,6 @@ const APIFilter = ({
     })
   }
 
-  const locale = localStorage.getItem('locale')
-  const handlingLocale = locale === 'hy' ? 'hy-am' : locale
   const uiTypes = () => {
     const type = filterUiHelper(typeElem.ColumnType, filterTyping.TypeForUi)
 
@@ -317,7 +316,6 @@ const APIFilter = ({
             isDisabled={isDisabled}
             inputSizes={inputSizes}
             translations={translations}
-            locale={handlingLocale}
             checkIsDisabled={checkIsDisabled}
             setColumnName={setColumnName}
             handleChangeRange={handleChangeRange}
@@ -334,7 +332,6 @@ const APIFilter = ({
             isDisabled={isDisabled}
             inputSizes={inputSizes}
             translations={translations}
-            locale={handlingLocale}
             setColumnName={setColumnName}
             handleChangeValue={handleChangeValueSingleInputs}
           />
@@ -380,41 +377,22 @@ const APIFilter = ({
               position: 'relative',
             }}
           >
-            <Autocomplete
-              value={filterTypesUiHelper[filterTyping.TypeForUi as keyof typeof filterTypesUiHelper]}
-              onChange={(event: any, newValue: string | null) => {
-                selectComparisonType(newValue)
-              }}
-              inputValue={filterTypesUiHelper[filterTyping.TypeForUi as keyof typeof filterTypesUiHelper]}
-              disablePortal
-              disableClearable
+            <label className='brt-field__label' htmlFor={operatorId}>
+              {translations?.filterAction?.operator || 'Condition'}
+            </label>
+            <select
+              id={operatorId}
+              className='brt-select'
+              value={filterTyping.TypeForUi}
               disabled={isDisabled}
-              size={inputSizes}
-              sx={{ ':hover': { cursor: 'pointer' } }}
-              id='controllable-states-demo'
-              options={typeElem.FilterTypes}
-              renderOption={({ key, ...optionProps }, option) => {
-                return (
-                  <li
-                    key={key}
-                    {...optionProps}
-                    style={{
-                      padding: '6px 16px',
-                    }}
-                  >
-                    {filterTypesUiHelper[option as keyof typeof filterTypesUiHelper]}
-                  </li>
-                )
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  sx={{
-                    caretColor: 'transparent',
-                  }}
-                />
-              )}
-            />
+              onChange={(event) => selectComparisonType(event.target.value)}
+            >
+              {typeElem.FilterTypes.map((type: string) => (
+                <option key={type} value={type}>
+                  {filterTypesUiHelper[type as keyof typeof filterTypesUiHelper] ?? type}
+                </option>
+              ))}
+            </select>
           </div>
         ) : null}
         {uiTypes()}

@@ -1,5 +1,5 @@
-import { Button } from '@mui/material'
-import React, { Fragment, memo, useState } from 'react'
+import { Button } from '../../../ui/Button'
+import { Fragment, memo, useState } from 'react'
 import { type IComparisonType, type IFiltersTypes, type ISelect, type ItemFields } from '../../../Models/table.models'
 import NativePopup from '../../../components/NativePopup/NativePopup'
 import FilterSvgIcon from '../../../svgIcons/FilterSvgIcon'
@@ -85,27 +85,20 @@ const Filter = ({
       <NativePopup
         ActiveIcon={FilterSvgIcon}
         isOpen={open}
-        popupName={translations?.filterAction.modalName || 'Filter By'}
+        popupName={translations?.filterAction?.modalName || 'Filter By'}
         handleOpen={handleOpen}
         handleClose={handleClose}
       >
         <div style={{ padding: '20px 0', width: 'clamp(330px, 35vw, 553px)' }}>
           <div style={{ width: '100%' }} className='G-justify-end'>
-            <div
-              role='button'
-              aria-label='advanced setting'
+            <button
+              type='button'
+              aria-pressed={advancedSettings}
+              className={`brt-link-button ${advancedSettings ? 'is-active' : ''}`}
               onClick={() => setAdvancedSettings((prev) => !prev)}
-              style={{
-                backgroundColor: 'white',
-                width: 'auto',
-                color: advancedSettings ? '#4844C5' : 'black',
-                cursor: 'pointer',
-                marginRight: 32,
-                textDecoration: 'underline',
-              }}
             >
-              {translations?.filterAction.advanced}
-            </div>
+              {translations?.filterAction?.advanced || 'Advanced'}
+            </button>
           </div>
           <ul
             className='P-Filters'
@@ -149,23 +142,21 @@ const Filter = ({
                 )
               })
             ) : (
-              <div>{translations?.filterAction.emptyColumns || 'Add Filters Columns'}</div>
+              <div>{translations?.filterAction?.emptyColumns || 'Add Filters Columns'}</div>
             )}
           </ul>
           <div style={{ padding: 20, borderTop: '1px  solid #F3F6F8' }}>
             <Button
-              size='medium'
+              variant='contained'
               fullWidth
               disabled={isDisabled}
-              style={{
-                marginBottom: 8,
-              }}
+              style={{ marginBottom: 8 }}
               onClick={handleSave}
             >
-              {translations?.filterAction.confirmFilters || 'Submit'}
+              {translations?.filterAction?.confirmFilters || 'Submit'}
             </Button>
-            <Button size='medium' variant='outlined' fullWidth onClick={handleCancel}>
-              {translations?.filterAction.clearFilters || 'Clear All Filters'}
+            <Button variant='outlined' fullWidth onClick={handleCancel}>
+              {translations?.filterAction?.clearFilters || 'Clear All Filters'}
             </Button>
           </div>
         </div>

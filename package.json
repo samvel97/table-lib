@@ -1,7 +1,7 @@
 {
   "name": "beautiful-react-table",
   "version": "8.0.0",
-  "description": "Feature-rich React data table: column customization with drag & drop, frozen rows and columns, server-side filters, aggregates, row actions and pagination.",
+  "description": "Feature-rich React data table without UI framework dependencies: column customization with drag and drop, frozen rows and columns, server-side filters, totals, row actions, pagination and optional virtualization.",
   "keywords": [
     "react",
     "table",
@@ -11,7 +11,7 @@
     "drag-and-drop",
     "filters",
     "pagination",
-    "mui"
+    "virtualization"
   ],
   "author": "Samvel Baghdasaryan (https://github.com/samvel97)",
   "license": "MIT",
@@ -60,23 +60,17 @@
     "prepublishOnly": "npm run lint && npm test && npm run build"
   },
   "peerDependencies": {
-    "@emotion/react": "^11.9.0",
-    "@emotion/styled": "^11.8.1",
-    "@mui/material": "^5.15.14 || ^6.0.0 || ^7.0.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.27.20",
     "@hello-pangea/dnd": "^18.0.1",
-    "@mui/x-date-pickers": "^8.29.5",
-    "dayjs": "^1.11.23"
+    "@tanstack/react-virtual": "^3.14.26"
   },
   "devDependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
     "@eslint/js": "^10.0.1",
     "@microsoft/api-extractor": "^7.60.1",
-    "@mui/material": "^7.3.11",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",

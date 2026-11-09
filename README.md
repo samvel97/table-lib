@@ -5,7 +5,7 @@ frozen rows and columns, server-side filters, totals, row actions, selection, do
 
 [![npm](https://img.shields.io/npm/v/beautiful-react-table.svg)](https://www.npmjs.com/package/beautiful-react-table)
 ![React 18 | 19](https://img.shields.io/badge/react-18%20%7C%2019-61dafb)
-![MUI 5 | 6 | 7](https://img.shields.io/badge/mui-5%20%7C%206%20%7C%207-007fff)
+![No UI framework](https://img.shields.io/badge/UI%20framework-none-success)
 ![TypeScript](https://img.shields.io/badge/types-included-3178c6)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
@@ -21,23 +21,21 @@ frozen rows and columns, server-side filters, totals, row actions, selection, do
 - **Totals footer** with per-column content
 - **Pagination** with page-size select and "go to page"
 - **Download** menu (XLSX / CSV) for checked rows or everything
-- Fully **typed** (`<Table<Order> />`), keyboard accessible controls, works with **React 18 and 19** and **MUI 5, 6 and 7**
+- **Virtualization** for large pages: thousands of rows with only the visible ones in the DOM
+- **No UI framework required**: its own lightweight, accessible controls, themable with CSS variables
+- Fully **typed** (`<Table<Order> />`), keyboard accessible, works with **React 18 and 19**
 
-![Filters panel with a date range picker](https://raw.githubusercontent.com/samvel97/table-lib/main/docs/filters.jpg)
+![Filters panel with a multi-select combobox](https://raw.githubusercontent.com/samvel97/table-lib/main/docs/filters.jpg)
 
 ## Installation
 
 ```bash
-npm install beautiful-react-table @mui/material @emotion/react @emotion/styled
+npm install beautiful-react-table
 ```
 
-| Peer dependency                         | Supported versions                 |
-| --------------------------------------- | ---------------------------------- |
-| `react`, `react-dom`                    | `^18.0.0 \|\| ^19.0.0`             |
-| `@mui/material`                         | `^5.15.14 \|\| ^6.0.0 \|\| ^7.0.0` |
-| `@emotion/react`, `@emotion/styled`     | `^11`                              |
-
-Drag and drop (`@hello-pangea/dnd`), date pickers (`@mui/x-date-pickers`) and `dayjs` are installed automatically.
+The only peer dependencies are `react` and `react-dom` (`^18 || ^19`). Drag and drop (`@hello-pangea/dnd`),
+menu positioning (`@floating-ui/react`) and virtualization (`@tanstack/react-virtual`) are installed automatically.
+No UI framework is needed; MUI is not required (apps that use MUI can keep it).
 Styles are imported by the package itself; no CSS import is needed.
 
 ## Quick start
@@ -157,6 +155,41 @@ you receive callbacks and decide what to fetch.
 
 Set `filterColumns[i].isLoading` while values for a column are loading.
 
+## Large pages: virtualization
+
+```tsx
+<Table virtualized data={rows} /* ... */ />
+// or tune it
+<Table virtualized={{ overscan: 15, estimateRowHeight: 40 }} data={rows} /* ... */ />
+```
+
+Only the rows near the visible area are rendered; row heights are measured, so cells may have any content.
+Measured in the playground (production build, Chrome):
+
+| Rows on the page | Without `virtualized` | With `virtualized` |
+| ---------------- | --------------------- | ------------------ |
+| 1,000            | 900 ms, 52,132 DOM nodes | 46 ms, ~1,000 DOM nodes |
+| 5,000            | 4.3 s, 260,109 DOM nodes | 43 ms, ~1,000 DOM nodes |
+
+It is off by default: with it, rows outside the viewport are not in the DOM, so browser search (Ctrl+F), printing
+and DOM-based end-to-end tests only see the visible rows. For paginated pages of 10–100 rows it brings no benefit.
+
+## Theming
+
+Colors, radii and sizes are CSS variables with defaults; set any of them on the table or a parent:
+
+```css
+:root {
+  --brt-accent: #0f766e;
+  --brt-accent-hover: #115e59;
+  --brt-accent-soft: #ccfbf1;
+  --brt-radius: 12px;
+}
+```
+
+Available: `--brt-accent`, `--brt-accent-hover`, `--brt-accent-soft`, `--brt-text`, `--brt-text-muted`, `--brt-border`,
+`--brt-border-strong`, `--brt-surface`, `--brt-surface-muted`, `--brt-row-hover`, `--brt-danger`, `--brt-radius`,
+`--brt-radius-sm`, `--brt-shadow`, `--brt-font-size`, `--brt-control-height`, `--brt-transition`.
 ## Selection, row actions and downloads
 
 | Prop                                  | Description                                                                              |
@@ -191,6 +224,7 @@ const translations = {
     emptyFieldData: 'No values', blank: '(Blank)', emptyString: '(Empty)', from: 'From', to: 'To',
     validations: { isEmpty: 'Required', onlyNumbers: 'Numbers only', err: 'Invalid range', invalid: 'Invalid date' },
     emptyColumns: 'No columns',
+    operator: 'Condition', // label of the operator select in advanced mode
   },
   dowloadAction: 'Download',
   pagination: { from: 'of', show: 'Show', rows: 'rows', to: 'Go to' },
@@ -207,8 +241,8 @@ const translations = {
 
 ## Upgrading from v7
 
-See [CHANGELOG.md](CHANGELOG.md#migrating-from-7x). In short: update peer dependencies, replace `react-beautiful-dnd`
-if you only installed it for this table, and import `beautiful-react-table/legacy-global.css` if your app relied on
+See [CHANGELOG.md](CHANGELOG.md#migrating-from-7x). In short: the table no longer needs MUI, Emotion or a drag-and-drop
+library, date filters use the browser's date-time input, and you can import `beautiful-react-table/legacy-global.css` if your app relied on
 the page-wide CSS reset that v7 applied.
 
 ## Development

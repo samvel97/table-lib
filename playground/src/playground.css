@@ -108,3 +108,8 @@ body {
   white-space: nowrap;
   text-align: left;
 }
+
+.toggles {
+  display: flex;
+  gap: 16px;
+}

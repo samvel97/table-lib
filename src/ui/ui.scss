@@ -1,0 +1,398 @@
+@use '../styles/tokens' as *;
+
+// ── Button ────────────────────────────────────────────────────────────────
+.brt-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: t('radius-sm');
+  background: transparent;
+  color: t('accent');
+  font: inherit;
+  font-size: t('font-size');
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color t('transition'),
+    border-color t('transition'),
+    color t('transition');
+
+  &:hover:not(:disabled) {
+    background: t('accent-soft');
+  }
+
+  &:focus-visible {
+    outline: 2px solid t('accent');
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &--outlined {
+    border-color: t('border-strong');
+    color: t('text');
+
+    &:hover:not(:disabled) {
+      border-color: t('accent');
+      background: t('surface');
+      color: t('accent');
+    }
+  }
+
+  &--contained {
+    background: t('accent');
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: t('accent-hover');
+    }
+  }
+
+  &--small {
+    min-height: 28px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  &--full {
+    width: 100%;
+  }
+}
+
+.brt-link-button {
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: t('text-muted');
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+
+  &:hover,
+  &.is-active {
+    color: t('accent');
+  }
+
+  &:focus-visible {
+    outline: 2px solid t('accent');
+  }
+}
+
+// ── Text field, select and combobox ───────────────────────────────────────
+.brt-field,
+.brt-combobox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: t('text');
+  font-size: t('font-size');
+
+  &--full {
+    width: 100%;
+  }
+}
+
+.brt-field__label {
+  color: t('text-muted');
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.brt-field__control,
+.brt-combobox__control,
+.brt-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: t('control-height');
+  padding: 0 10px;
+  border: 1px solid t('border');
+  border-radius: t('radius-sm');
+  background: t('surface');
+  transition:
+    border-color t('transition'),
+    box-shadow t('transition');
+
+  &:hover {
+    border-color: t('border-strong');
+  }
+
+  &:focus-within,
+  &.is-open {
+    border-color: t('accent');
+    box-shadow: 0 0 0 3px t('accent-soft');
+  }
+}
+
+.brt-field__input,
+.brt-combobox__input {
+  flex: 1;
+  min-width: 60px;
+  height: 100%;
+  min-height: calc(#{t('control-height')} - 2px);
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.brt-select {
+  width: 100%;
+  appearance: auto;
+  font: inherit;
+  color: t('text');
+  cursor: pointer;
+}
+
+.brt-combobox__control {
+  flex-wrap: wrap;
+  padding: 3px 8px;
+  cursor: text;
+}
+
+.brt-field--error .brt-field__control,
+.brt-field--error .brt-combobox__control {
+  border-color: t('danger');
+}
+
+.brt-field__error {
+  color: t('danger');
+  font-size: 12px;
+}
+
+.brt-combobox.is-disabled,
+.brt-field__control:has(:disabled) {
+  opacity: 0.6;
+}
+
+// ── Chips ─────────────────────────────────────────────────────────────────
+.brt-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 4px 2px 8px;
+  border-radius: 999px;
+  background: t('accent-soft');
+  color: t('accent');
+  font-size: 12px;
+  font-weight: 600;
+
+  &--more {
+    padding-right: 8px;
+  }
+}
+
+.brt-chip__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brt-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: rgb(72 68 197 / 15%);
+  }
+}
+
+// ── Floating layers: menus and listboxes ──────────────────────────────────
+.brt-floating {
+  z-index: 1400;
+  box-sizing: border-box;
+  color: t('text');
+  font-size: t('font-size');
+}
+
+.brt-popup-menu,
+.brt-listbox {
+  overflow: auto;
+  border: 1px solid t('border');
+  border-radius: t('radius');
+  background: t('surface');
+  box-shadow: t('shadow');
+}
+
+.brt-listbox {
+  padding: 4px;
+}
+
+.brt-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: t('radius-sm');
+  cursor: pointer;
+
+  &.is-active {
+    background: t('row-hover');
+  }
+
+  &[aria-selected='true'] {
+    color: t('accent');
+    font-weight: 600;
+  }
+
+  &--separated {
+    border-bottom: 1px solid t('border');
+    border-radius: 0;
+  }
+}
+
+.brt-option__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brt-option__check {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid t('border-strong');
+  border-radius: 4px;
+
+  &.is-checked {
+    border-color: t('accent');
+    background: t('accent')
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / 14px no-repeat;
+  }
+}
+
+.brt-listbox__empty,
+.brt-listbox__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  color: t('text-muted');
+}
+
+.brt-listbox__footer {
+  padding: 4px;
+  border-top: 1px solid t('border');
+}
+
+// ── Feedback ──────────────────────────────────────────────────────────────
+.brt-spinner {
+  display: inline-block;
+  flex: none;
+  border: 2px solid t('accent-soft');
+  border-top-color: t('accent');
+  border-radius: 50%;
+  animation: brt-spin 0.7s linear infinite;
+}
+
+.brt-skeleton {
+  display: block;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #eef1f5 25%, #f7f9fb 37%, #eef1f5 63%);
+  background-size: 400% 100%;
+  animation: brt-shimmer 1.4s ease infinite;
+}
+
+@keyframes brt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes brt-shimmer {
+  from {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brt-spinner,
+  .brt-skeleton {
+    animation-duration: 0s;
+  }
+}
+
+// ── Range (from – to) ─────────────────────────────────────────────────────
+.brt-range {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  > .brt-field {
+    flex: 1;
+  }
+}
+
+.brt-range__separator {
+  align-self: flex-end;
+  padding-bottom: 10px;
+  color: t('text-muted');
+}
+
+// ── Popup trigger (toolbar buttons that open menus) ───────────────────────
+.brt-popup-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: t('radius-sm');
+  background: transparent;
+  color: t('text');
+  font: inherit;
+  font-size: t('font-size');
+  cursor: pointer;
+
+  &:hover {
+    background: t('surface-muted');
+  }
+
+  &:focus-visible {
+    outline: 2px solid t('accent');
+  }
+
+  &[aria-expanded='true'] {
+    color: t('accent');
+  }
+}
+
+// The control shows the focus ring; avoid a second outline on the inner input.
+.brt-field__input:focus-visible,
+.brt-combobox__input:focus-visible {
+  outline: none;
+}

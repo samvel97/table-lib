@@ -84,7 +84,7 @@ img {
 
 // Visible focus for keyboard users (v7 removed every outline on the page).
 :focus-visible {
-  outline: 2px solid #4844c5;
+  outline: 2px solid var(--brt-accent, #4844c5);
   outline-offset: 1px;
 }
 

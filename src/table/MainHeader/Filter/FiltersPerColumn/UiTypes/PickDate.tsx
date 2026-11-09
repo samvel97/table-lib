@@ -1,17 +1,9 @@
-import { useState } from 'react'
-import type { Dayjs } from 'dayjs'
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
-import { PICKER_LAYOUT_SX } from './pickerLayout'
-import ActionList from '../../../../../components/datePickerActionList/ActionList'
-import { DateActionTranslationsContext } from '../../../../../components/datePickerActionList/context'
-import { type inputSize } from '../../../../../Models/table.enum'
-import { toPickerDate } from '../../../../../utils'
-import 'dayjs/locale/en'
-import 'dayjs/locale/ru'
-import 'dayjs/locale/hy-am'
+import { useState, type ChangeEvent } from 'react'
+import type { IComparisonType, ItemFields } from '../../../../../Models/table.models'
+import type { inputSize } from '../../../../../Models/table.enum'
+import { TextField } from '../../../../../ui/TextField'
+import { fromLocalInputValue, toLocalInputValue } from '../../../../../utils/localDateTime'
+
 interface IPickDate {
   columnsSizes: string
   item: IComparisonType
@@ -21,10 +13,14 @@ interface IPickDate {
   isDisabled: boolean
   inputSizes: inputSize
   translations?: Record<string, any>
+  /** @deprecated The browser formats the native date input in the user's locale. */
   locale?: string | null
   setColumnName: (name: string) => void
-  handleChangeValue(option: any): void
+  /** Receives a `Date`, `''` when cleared, or `'invalid'`. */
+  handleChangeValue(option: Date | '' | 'invalid'): void
 }
+
+/** Single date-time filter (Equal, GreaterThan, ...) using the native date-time input. */
 const PickDate = ({
   columnsSizes,
   advancedSettings,
@@ -32,72 +28,51 @@ const PickDate = ({
   columnName,
   filterTyping,
   isDisabled,
-  inputSizes,
   translations,
-  locale = 'hy-am',
   setColumnName,
   handleChangeValue,
 }: IPickDate) => {
   const [errMessage, setErrMessage] = useState('')
-  const handlePick = (newValue: Dayjs | null) => {
-    if (newValue !== null && isNaN(newValue.valueOf() as number)) {
-      setErrMessage(translations?.filterAction?.validations?.invalid || 'invalid')
-    } else {
-      setErrMessage('')
+  const [draft, setDraft] = useState<string | null>(null)
+  const value = draft ?? toLocalInputValue(filterTyping.Values[0])
 
-      setColumnName(item.ColumnName)
-      handleChangeValue(
-        newValue
-          ? isNaN(newValue.valueOf() as number)
-            ? 'invalid'
-            : new Date(newValue.valueOf() as number | string)
-          : '',
-      )
-    }
-  }
-  const handleOpenList = () => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const raw = event.target.value
+    setDraft(raw)
     setColumnName(item.ColumnName)
+    if (!raw) {
+      setErrMessage('')
+      handleChangeValue('')
+      return
+    }
+    const date = fromLocalInputValue(raw)
+    if (!date) {
+      setErrMessage(translations?.filterAction?.validations?.invalid || 'Invalid date')
+      handleChangeValue('invalid')
+      return
+    }
+    setErrMessage('')
+    handleChangeValue(date)
   }
-  const handleClose = () => {
-    if (!isDisabled) setColumnName('')
-  }
-  const unFocused = () => {
-    if (!isDisabled) setColumnName('')
-  }
+
   return (
     <div className={item.IsBold ? 'IsBold' : ''} style={{ width: advancedSettings ? columnsSizes : '100%' }}>
-      <DateActionTranslationsContext.Provider value={translations?.filterAction}>
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale ?? undefined}>
-          <div
-            style={{ width: '100%', position: 'relative' }}
-            tabIndex={0}
-            onBlur={unFocused}
-            className={errMessage ? 'date-picker' : ''}
-          >
-            <DateTimePicker
-              slotProps={{ textField: { size: inputSizes }, layout: { sx: PICKER_LAYOUT_SX } }}
-              timeSteps={{ hours: 1, minutes: 1, seconds: 1 }}
-              minutesStep={1}
-              ampm={false}
-              label={item.key || item.ColumnName}
-              disabled={isDisabled && item.ColumnName !== columnName}
-              displayWeekNumber
-              onOpen={handleOpenList}
-              onClose={handleClose}
-              value={toPickerDate(filterTyping.Values[0])}
-              format='YYYY-MM-DD HH:mm:ss'
-              onChange={handlePick}
-              views={['year', 'day', 'hours', 'minutes', 'seconds']}
-              sx={{ width: '100%' }}
-              slots={{
-                actionBar: ActionList,
-              }}
-            />
-            {errMessage ? <div className='filter-error'>{errMessage}</div> : null}
-          </div>
-        </LocalizationProvider>
-      </DateActionTranslationsContext.Provider>
+      <TextField
+        type='datetime-local'
+        step={1}
+        label={item.key || item.ColumnName}
+        value={value}
+        error={errMessage}
+        disabled={isDisabled && item.ColumnName !== columnName}
+        onFocus={() => setColumnName(item.ColumnName)}
+        onBlur={() => {
+          setDraft(null)
+          if (!isDisabled) setColumnName('')
+        }}
+        onChange={handleChange}
+      />
     </div>
   )
 }
+
 export default PickDate

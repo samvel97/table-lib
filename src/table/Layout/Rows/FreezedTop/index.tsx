@@ -1,3 +1,4 @@
+import { useTableLayout } from '../../../layoutContext'
 import type { TableIcon } from '../../../../Models/table.models'
 import { type RowId } from '../../../../utils/rowId'
 import React, { useEffect, useRef, useState } from 'react'
@@ -15,7 +16,6 @@ import { CheckedItems, StructureConfig } from '../../../../Models/table.enum'
 import FreezeRowSvgIcon from '../../../../svgIcons/FrameSvgIcon'
 import EditSvgIcon from '../../../../svgIcons/EditSvgIcon'
 import DeleteSvgIcon from '../../../../svgIcons/DeleteSvgIcon'
-import { hasScroll } from '../../../../utils'
 interface IFreezedRows<T extends object> {
   freezedRows: T[]
   columnsConfigStructure: IColumnConfigStructure<T>
@@ -84,6 +84,7 @@ const FreezedRows = <T extends object>({
 
     dragDropFreezeRow(items)
   }
+  const { hasHorizontalScroll } = useTableLayout()
   const [width, setWidth] = useState<number>(0)
   function pickBackGroundColor(option: number) {
     if (option % 2 == 0) {
@@ -121,7 +122,10 @@ const FreezedRows = <T extends object>({
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                     >
-                      <div style={{ display: 'flex', width: hasScroll() ? 'max-content' : 'auto' }} className='G-row'>
+                      <div
+                        style={{ display: 'flex', width: hasHorizontalScroll ? 'max-content' : 'auto' }}
+                        className='G-row'
+                      >
                         {/* HOVERED ROWS */}
                         <ul
                           className='G-rows-icons'

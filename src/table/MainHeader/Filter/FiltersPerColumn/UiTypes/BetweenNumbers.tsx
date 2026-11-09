@@ -1,6 +1,6 @@
 import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
-import React, { useEffect, useState } from 'react'
-import { TextField } from '@mui/material'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { TextField } from '../../../../../ui/TextField'
 import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
 import { validateRangeColumns } from '../../../../../utils'
 import { ColumnTypeEnums, type inputSize } from '../../../../../Models/table.enum'
@@ -24,7 +24,6 @@ const BetweenNumbers = ({
   filterTyping,
   columnName,
   isDisabled,
-  inputSizes,
   translations,
   setColumnName,
   handleChangeRange,
@@ -37,7 +36,7 @@ const BetweenNumbers = ({
     isEnabledTo: false,
   })
 
-  const handleChangeInputValue = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeInputValue = (event: ChangeEvent<HTMLInputElement>) => {
     const stateValues = { ...val }
     const { value, name } = event.target
     if (stateValues.to === undefined) {
@@ -48,13 +47,15 @@ const BetweenNumbers = ({
     }
     setErrMessage({ from: '', to: '' })
     if (name === 'to') {
-      if (!validateRangeColumns(stateValues.from, value, item, setErrMessage, translations?.filterAction.validations)) {
+      if (
+        !validateRangeColumns(stateValues.from, value, item, setErrMessage, translations?.filterAction?.validations)
+      ) {
         handleChangeRange(stateValues.from, value)
       } else {
         checkIsDisabled(true)
       }
     } else {
-      if (!validateRangeColumns(value, stateValues.to, item, setErrMessage, translations?.filterAction.validations)) {
+      if (!validateRangeColumns(value, stateValues.to, item, setErrMessage, translations?.filterAction?.validations)) {
         handleChangeRange(value, stateValues.to)
       } else {
         checkIsDisabled(true)
@@ -75,13 +76,6 @@ const BetweenNumbers = ({
       })
     }
     setColumnName(item.ColumnName)
-  }
-  const getError = (messageLength: number) => {
-    if (!isEnabled.isEnabledFrom && !isEnabled.isEnabledTo && messageLength) {
-      return true
-    }
-
-    return false
   }
   const errMessageText = (errMessage: string) => {
     if (!isEnabled.isEnabledFrom && !isEnabled.isEnabledTo && errMessage.length) {
@@ -104,11 +98,10 @@ const BetweenNumbers = ({
   }, [isEnabled])
 
   return (
-    <div className='G-justify-between' style={{ width: advancedSettings ? columnsSizes : '100%' }}>
+    <div className='brt-range' style={{ width: advancedSettings ? columnsSizes : '100%' }}>
       <TextField
         id={`from-${item.ColumnName}`}
-        label={translations?.filterAction.from || 'From'}
-        variant='outlined'
+        label={translations?.filterAction?.from || 'From'}
         name={'from'}
         onBlur={() => {
           setIsEnabled((prev) => {
@@ -116,33 +109,26 @@ const BetweenNumbers = ({
           })
         }}
         onFocus={() => handleOpenList('from')}
-        error={getError(errMessage.from.length)}
-        helperText={errMessageText(errMessage.from)}
+        error={errMessageText(errMessage.from)}
         disabled={columnName !== item.ColumnName && isDisabled}
-        sx={{
-          width: '48%',
-        }}
         value={val.from}
-        size={inputSizes}
         onChange={handleChangeInputValue}
       />
-      <div className='G-center'>-</div>
+      <span className='brt-range__separator' aria-hidden='true'>
+        –
+      </span>
       <TextField
         id={`to-${item.ColumnName}`}
-        label={translations?.filterAction.to || 'To'}
-        variant='outlined'
+        label={translations?.filterAction?.to || 'To'}
         name={'to'}
-        size={inputSizes}
         onBlur={() => {
           setIsEnabled((prev) => {
             return { ...prev, isEnabledTo: false }
           })
         }}
         onFocus={() => handleOpenList('to')}
-        error={getError(errMessage.to.length)}
-        helperText={errMessageText(errMessage.to)}
+        error={errMessageText(errMessage.to)}
         disabled={columnName !== item.ColumnName && isDisabled}
-        sx={{ width: '48%' }}
         value={val.to}
         onChange={handleChangeInputValue}
       />

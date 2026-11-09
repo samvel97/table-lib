@@ -5,9 +5,8 @@ interface IClickOutSide {
   children: ReactNode
 }
 
-/** True when the click happened inside a MUI dialog/popover (e.g. a date picker opened from inside this element). */
-const isInsideMuiOverlay = (target: Element | null) =>
-  Boolean(target?.closest('[role="dialog"], [role="presentation"]'))
+/** True when the click happened inside one of the table's floating layers (listbox, menu) rendered in a portal. */
+const isInsideFloatingLayer = (target: Element | null) => Boolean(target?.closest('[data-brt-floating]'))
 
 /** Calls `onClickOutside` for clicks outside its children. */
 const ClickOutside = ({ onClickOutside, children }: IClickOutSide) => {
@@ -22,7 +21,7 @@ const ClickOutside = ({ onClickOutside, children }: IClickOutSide) => {
     const handle = (event: MouseEvent) => {
       const target = event.target as Element | null
       if (!containerRef.current || containerRef.current.contains(target)) return
-      if (isInsideMuiOverlay(target)) return
+      if (isInsideFloatingLayer(target)) return
       callbackRef.current(event)
     }
     document.addEventListener('click', handle, true)

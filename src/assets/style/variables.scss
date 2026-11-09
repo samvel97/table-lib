@@ -44,8 +44,8 @@ $blue-base-opacity: rgba(41, 46, 70, 0.6);
 
 $green-rgba-15: #f2f8e1;
 $green-rgba-10: #f7fbec;
-$hover-color: #f6fafd;
-$active-color: #4844c5;
+$hover-color: var(--brt-accent-soft, #ececfb);
+$active-color: var(--brt-accent, #4844c5);
 
 $orange-gradient: linear-gradient(to left, #f5d717, #ffa800);
 $green-gradient: linear-gradient(to right, #8bc34a, #a6ce38);

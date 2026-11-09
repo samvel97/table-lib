@@ -2,14 +2,24 @@
 
 ## 8.0.0
 
-A modernization release: React 19 support, maintained dependencies, a much smaller package, styles that no longer
-leak into the host app, and a set of bug fixes. **The component API is unchanged**: every v7 prop and export still
+A modernization release: React 19 support, **no UI framework dependency** (MUI and Emotion removed), a refreshed UI,
+optional row virtualization, theming with CSS variables, styles that no longer leak into the host app, and a set of
+bug fixes. **The component API is unchanged**: every v7 prop and export still
 exists with the same name.
 
 ### Breaking changes
 
-- **Peer dependencies**: `react` / `react-dom` `^18 || ^19`, `@mui/material` `^5.15.14 || ^6 || ^7`,
-  `@emotion/react` / `@emotion/styled` `^11`. React 16/17 and MUI below 5.15.14 are no longer supported.
+- **Peer dependencies**: only `react` / `react-dom` `^18 || ^19`. `@mui/material`, `@emotion/react`,
+  `@emotion/styled`, `@mui/x-date-pickers` and `dayjs` are no longer needed; the table ships its own small,
+  accessible controls (built on `@floating-ui/react`). Apps that use MUI can keep it.
+- **Refreshed look**: rounded bordered container, calmer header, row hover highlight, new filter fields, menus and
+  buttons. The default accent color is unchanged (`#4844c5`); everything is themable through `--brt-*` CSS
+  variables. Tables in existing apps will look different after upgrading.
+- **Date filters use the browser's native date-time input** instead of the MUI picker. Callbacks still receive
+  `Date` objects. The date format follows the user's browser locale, so the internal `locale` setting no longer
+  applies.
+- The table no longer reads CSS variables from the host app (`--blue-base`, `--grey-base`, `--white-01`,
+  `--transition`, `--grey-55`, `--font-size-14`); it uses its own `--brt-*` tokens with defaults.
 - **`react-beautiful-dnd` replaced by `@hello-pangea/dnd`** (its maintained fork). It is a regular dependency now,
   so you no longer need to install a drag-and-drop library for the table.
 - **Global CSS is scoped.** v7 applied a page-wide reset to every app that imported it: margins and paddings on most
@@ -21,7 +31,21 @@ exists with the same name.
   `dist/index.css` (imported automatically). Deep imports such as
   `beautiful-react-table/dist/cjs/types/Models/table.models` no longer exist; import the types from the package root.
 
+### Added
+
+- **`virtualized`** prop: render only the rows near the visible area (`@tanstack/react-virtual`). Measured in the
+  playground (production build): 5,000 rows render in 43 ms with ~1,000 DOM nodes instead of 4.3 s with 260,109.
+  Off by default (see README for the trade-offs). `VirtualizationOptions` type exported.
+- **Theming** with CSS variables: `--brt-accent`, `--brt-border`, `--brt-radius`, ... (full list in README).
+- `translations.filterAction.operator`: label of the operator select in advanced filter mode.
+
 ### Fixed
+
+- The select-all menu kept the functions and translations from the first render, so "Select all" could select
+  stale rows after paging or filtering.
+- With two tables on a page, both read the first table's scroll state (`hasScroll()` used the first
+  `.G-data-scroll` in the document, once per row on every render).
+- Every cell animated all properties (`transition: 0.3s`), which made large tables slower to update.
 
 - **Filters panel crashed** with `TypeError: endOf is not a function` when a Date column was configured: the date
   pickers received `null` as min/max date. Date ranges also no longer use "Invalid Date" as a limit.
@@ -40,8 +64,6 @@ exists with the same name.
 - Styles that targeted generated MUI class names (`.css-1d3z3hw-MuiOutlinedInput-notchedOutline`, ...) only worked
   for one MUI version and affected every MUI component in the app. They now use stable class names or `sx`.
   This also restores the red border on invalid date fields.
-- Date picker action bar: rebuilt for MUI X v8 (`usePickerActionsContext`), no longer remounted on every render, and
-  the "Today" button uses a valid variant.
 - `ClickOutside` shared one element id across all instances, ignored its own container and re-subscribed on every
   render. Popups now have unique ids (`useId`), so `aria-labelledby` points at the right button.
 - Option labels with numeric names rendered as `[object Object]`; filter options were rendered as `<div>`s inside a
@@ -57,8 +79,8 @@ exists with the same name.
   every prop documented with JSDoc, icon props accept any component (not only `React.memo` ones), new exports:
   `IComparisonType`, `IFiltersTypes`, `IOrdering`, `ISelect`, `IColumnTotalStructure`, `CheckedItems`, `TableIcon`,
   `IProps`, and `IRowActions` (alias of `IrowActions`).
-- Package size: ~180 kB packed / 10 files (v7: ~3.2 MB in 153 files). `react-beautiful-dnd`, the date pickers and
-  build tools are no longer bundled or installed as runtime dependencies; the package no longer depends on itself.
+- Package size: ~190 kB packed / 11 files (v7: ~3.2 MB in 153 files). Runtime dependencies are only
+  `@floating-ui/react`, `@hello-pangea/dnd` and `@tanstack/react-virtual`; the package no longer depends on itself.
 - Tooling: Vite 8 library mode, TypeScript 6, ESLint 10 flat config, Prettier 3, Vitest with tests for row state,
   column moves, pagination and date handling, a playground (`npm run dev`) and CI.
 
@@ -70,9 +92,9 @@ These props are accepted but have no effect (as in 7.8.2): `perColumnListForFilt
 
 ### Migrating from 7.x
 
-1. Update the peers if needed: `npm install beautiful-react-table@8 @mui/material@">=5.15.14" @emotion/react @emotion/styled`.
-   React 18 and MUI 5 keep working; upgrading them is not required.
-2. If you installed `react-beautiful-dnd` only for this table, you can remove it.
+1. `npm install beautiful-react-table@8`. React 18 keeps working; MUI is no longer needed by the table (keep it if
+   your app uses it).
+2. If you installed `react-beautiful-dnd`, `@mui/x-date-pickers` or `dayjs` only for this table, you can remove them.
 3. Replace deep imports with root imports:
    ```ts
    // before

@@ -31,4 +31,5 @@ export type {
   IOrdering,
   ISelect,
   TableIcon,
+  VirtualizationOptions,
 } from './Models/table.models'

@@ -15,13 +15,13 @@
   ],
   "author": "Samvel Baghdasaryan (https://github.com/samvel97)",
   "license": "MIT",
-  "homepage": "https://samvel97.github.io/web-lib-panda-table/",
+  "homepage": "https://samvel97.github.io/table-lib/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/samvel97/web-lib-panda-table.git"
+    "url": "git+https://github.com/samvel97/table-lib.git"
   },
   "bugs": {
-    "url": "https://github.com/samvel97/web-lib-panda-table/issues"
+    "url": "https://github.com/samvel97/table-lib/issues"
   },
   "type": "module",
   "main": "./dist/index.cjs",

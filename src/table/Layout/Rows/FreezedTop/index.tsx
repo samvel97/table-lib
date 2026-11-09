@@ -1,6 +1,13 @@
+import type { TableIcon } from '../../../../Models/table.models'
+import { type RowId } from '../../../../utils/rowId'
 import React, { useEffect, useRef, useState } from 'react'
-import { IColumnConfig, IColumnConfigStructure, ILinksList, IrowActions } from '../../../../Models/table.models'
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+import {
+  type IColumnConfig,
+  type IColumnConfigStructure,
+  type ILinksList,
+  type IrowActions,
+} from '../../../../Models/table.models'
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd'
 import Checkbox from '../../../../components/checkbox'
 import FreezedRightColumns from '../FreezedRigthColumns'
 import FreezedLeftColumns from '../FreezedLeftColumns'
@@ -9,14 +16,14 @@ import FreezeRowSvgIcon from '../../../../svgIcons/FrameSvgIcon'
 import EditSvgIcon from '../../../../svgIcons/EditSvgIcon'
 import DeleteSvgIcon from '../../../../svgIcons/DeleteSvgIcon'
 import { hasScroll } from '../../../../utils'
-interface IFreezedRows<T extends Object> {
+interface IFreezedRows<T extends object> {
   freezedRows: T[]
   columnsConfigStructure: IColumnConfigStructure<T>
   rightFreezeConfig?: IColumnConfig<T>[]
   multipleCheck?: boolean
   columnMinWidth?: number
   rowActions?: IrowActions[]
-  FreezeIcon?: React.MemoExoticComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
+  FreezeIcon?: TableIcon
   links?: ILinksList[]
   checkedLink?: T
   freezedLeftSideColor?: string
@@ -24,7 +31,7 @@ interface IFreezedRows<T extends Object> {
   freezedRightSide?: string
   freezedRightSideVisible?: boolean
   isStickyFirstColumn?: boolean
-  RightSideIcon?: React.MemoExoticComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
+  RightSideIcon?: TableIcon
   leftFreezedColumnWidth?: number
   rightFreezedColumnWidth?: number
   headerHeight?: number
@@ -33,13 +40,13 @@ interface IFreezedRows<T extends Object> {
   isLoadedData?: boolean
   getRow?(options: any): any
   RightSideSelfAction?: (option: number | string) => void
-  getRowForDropdown(option: number): void
+  getRowForDropdown(id: RowId): void
   dragDropFreezeRow(option: T[]): void
   unFreezeRow(e: any, option: number): void
-  isCheckedRows(option: number): boolean
-  handleCheck(option: number): void
+  isCheckedRows(id: RowId): boolean
+  handleCheck(id: RowId): void
 }
-const FreezedRows = <T extends Object>({
+const FreezedRows = <T extends object>({
   freezedRows,
   columnsConfigStructure,
   rightFreezeConfig,
@@ -59,7 +66,6 @@ const FreezedRows = <T extends Object>({
   rightFreezedColumnWidth,
   headerHeight,
   selectedType,
-  hasOrdering,
   isLoadedData,
   getRow,
   RightSideSelfAction,
@@ -126,8 +132,7 @@ const FreezedRows = <T extends Object>({
                           <li className='G-rows-icons' style={{ left: !isStickyFirstColumn ? '50%' : '' }}>
                             <div className='G-icons-group'>
                               {rowActions && rowActions.length
-                                ? //@ts-ignore
-                                  rowActions.map((elem, index) => {
+                                ? rowActions.map((elem, index) => {
                                     if (index < 3)
                                       return (
                                         <div
@@ -167,7 +172,6 @@ const FreezedRows = <T extends Object>({
                               <Checkbox
                                 isDisable={selectedType === CheckedItems.SELECTED_ALL}
                                 isCheck={isCheckedRows(item.id)}
-                                //@ts-ignore
                                 onClick={() => handleCheck(item.id)}
                                 customClass='G-checkbox'
                               />
@@ -205,7 +209,8 @@ const FreezedRows = <T extends Object>({
                                 <li
                                   style={{
                                     ...column.customStyle,
-                                    minWidth: columnMinWidth && columnMinWidth + 'px',
+                                    // Same sizing as regular rows and the header, so frozen rows stay aligned.
+                                    maxWidth: (column.width || columnMinWidth) + 'px',
                                   }}
                                   key={column.id}
                                 >
@@ -243,10 +248,7 @@ const FreezedRows = <T extends Object>({
                                         backgroundColor: freezedRightSideColor && freezedRightSideColor,
                                       }}
                                     >
-                                      {
-                                        //@ts-ignore
-                                        elem.setRow(item)
-                                      }
+                                      {elem.setRow(item)}
                                       {/* <FreezedRightColumns
                                 item={item}
                                 checkedLink={checkedLink}

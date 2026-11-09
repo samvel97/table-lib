@@ -1,54 +1,49 @@
-.css-6hp17o-MuiList-root-MuiMenu-list{
-    padding: 0 !important;
+.icon-bx_columns {
+  font-size: 20px !important;
+  margin-right: 10px;
 }
-.icon-bx_columns{
-    font-size: 20px !important;
-    margin-right: 10px;
+.G-costumize-wrapper {
+  margin-left: 5px;
 }
-.G-costumize-wrapper{
-    margin-left: 5px;
-}
-.G-costumize-modal{
+.G-costumize-modal {
+  border-radius: 4px;
+  border: 1px solid var(--color-light-100, #ececec);
+  background: #fff;
+  box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.04);
+  .G-costumize-header {
+    font-size: 18px;
+    padding: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+  }
+  .G-columns-header {
+    padding: 30px 0px 10px 20px;
+  }
+  .G-left-column {
     border-radius: 4px;
-    border: 1px solid var(--color-light-100, #ECECEC);
-    background: #FFF;
-    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.04);
-    .G-costumize-header{
-        font-size: 18px;
-        padding: 20px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+    // padding: 4px;
+    min-width: 250px;
+    aspect-ratio: 1/1;
+    overflow-y: auto;
+    .G-item-name {
+      min-width: 150px;
+      font-size: 18px;
+      max-width: 150px;
+      &-text {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
     }
-    .G-columns-header{
-        padding: 30px 0px 10px 20px
+  }
+  .G-confirm-button {
+    display: flex;
+    justify-content: end;
+    button {
+      background: #fed12e;
+      border-radius: 4px;
+      margin: 24px;
+      width: 100%;
+      padding: 6px 0;
     }
-    .G-left-column{
-        border-radius: 4px;
-        // padding: 4px;
-        min-width: 250px;
-        aspect-ratio: 1/1;
-        overflow-y: auto;
-        .G-item-name{
-            min-width: 150px;
-            font-size: 18px;
-            max-width: 150px;
-            &-text {
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-            }
-        }
-    }
-    .G-confirm-button{
-        
-        display: flex;
-        justify-content: end;
-        button{
-            background: #FED12E;
-            border-radius: 4px;
-            margin: 24px;
-            width: 100%;
-            padding: 6px 0;
-        }
-    }
+  }
 }
-

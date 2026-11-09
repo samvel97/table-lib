@@ -1,53 +1,39 @@
-.P-Filters{
-    .ForModal{
-        .MuiSvgIcon-root{
-            path{
-                color: #4844C5;
-            }
-        }
+.P-Filters {
+  .ForModal {
+    .MuiSvgIcon-root {
+      path {
+        color: #4844c5;
+      }
     }
-    .css-1h51icj-MuiAutocomplete-root div.MuiAutocomplete-tag{
-        background-color: #DADAF3;
-        max-width: calc(100% - 50px); 
-        justify-content: space-between;
-    }
-    .css-1q79v3g-MuiButtonBase-root-MuiChip-root .MuiChip-deleteIcon{
-        color: white;
-        font-size: 25px ;
-    }
-    .css-1wc848c-MuiFormHelperText-root{
-        line-height: none !important;
-        margin-top: 0;
-    }
-    .css-1d3z3hw-MuiOutlinedInput-notchedOutline{
-        border-color: #CED8DD;
-        
-    }
-    .css-i4bv87-MuiSvgIcon-root{
-        color:#ACBCC3
-    }
-    
+  }
+  .MuiAutocomplete-root div.MuiAutocomplete-tag {
+    background-color: #dadaf3;
+    max-width: calc(100% - 50px);
+    justify-content: space-between;
+  }
+  .MuiChip-root .MuiChip-deleteIcon {
+    color: white;
+    font-size: 25px;
+  }
+  .MuiFormHelperText-root {
+    line-height: none !important;
+    margin-top: 0;
+  }
+  .MuiOutlinedInput-notchedOutline {
+    border-color: #ced8dd;
+  }
+  .MuiSvgIcon-root {
+    color: #acbcc3;
+  }
 }
-.MuiPaper-root .MuiPickersLayout-root{
-    display: flex;
-    flex-direction: column-reverse;
-    
-}
-
 .date-picker {
-    .css-1d3z3hw-MuiOutlinedInput-notchedOutline{
-        border-color: red !important;
-    }
+  .MuiOutlinedInput-notchedOutline {
+    border-color: red !important;
+  }
 }
 
-// li.MuiButtonBase-root :after {
-//         content: "";
-//         background: red;
-//         width: 20px;
-//         aspect-ratio: 1/1;
-//         height: auto !important;
-//     }
-
-// .css-lk6str-MuiList-root-MuiMultiSectionDigitalClockSection-root:after {
-//     height: auto !important;
-// }
+.filter-error {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 2px;
+}

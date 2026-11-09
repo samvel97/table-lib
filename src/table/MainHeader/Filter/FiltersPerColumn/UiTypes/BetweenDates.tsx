@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from 'react'
-import dayjs, { Dayjs } from 'dayjs'
+import { useEffect, useState } from 'react'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { IComparisonType, ItemFields } from '../../../../../Models/table.models'
-import './style.scss'
-import { validateRangeColumns } from '../../../../../utils'
-import ActionList from '../../../../../components/datePickerActionList/ActionList'
-import { inputSize } from '../../../../../Models/table.enum'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import type { Dayjs } from 'dayjs'
 import 'dayjs/locale/en'
 import 'dayjs/locale/ru'
 import 'dayjs/locale/hy-am'
-interface IPickDate {
+import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
+import { PICKER_LAYOUT_SX } from './pickerLayout'
+import { type inputSize } from '../../../../../Models/table.enum'
+import { toPickerDate, validateRangeColumns } from '../../../../../utils'
+import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
+import ActionList from '../../../../../components/datePickerActionList/ActionList'
+import { DateActionTranslationsContext } from '../../../../../components/datePickerActionList/context'
+import './style.scss'
+
+type RangeSide = 'from' | 'to'
+type RangeValue = Date | string | undefined
+
+interface IBetweenDates {
   columnsSizes: string
   item: IComparisonType
   advancedSettings: boolean
@@ -23,12 +30,13 @@ interface IPickDate {
   locale?: string | null
   setColumnName: (name: string) => void
   checkIsDisabled: (option: boolean) => void
-  handleChangeRange(from: any, to: any): void
+  handleChangeRange(from: RangeValue, to: RangeValue): void
 }
-interface IDateValues {
-  from: undefined | null | Date | string
-  to: undefined | null | Date | string
-}
+
+const PICKER_VIEWS = ['year', 'day', 'hours', 'minutes', 'seconds'] as const
+const TIME_STEPS = { hours: 1, minutes: 1, seconds: 1 }
+
+/** Date range filter ("Between") with two linked date-time pickers. */
 const BetweenDates = ({
   columnsSizes,
   item,
@@ -42,179 +50,99 @@ const BetweenDates = ({
   checkIsDisabled,
   setColumnName,
   handleChangeRange,
-}: IPickDate) => {
-  const [val, setVal] = useState<IDateValues>({
-    from: null,
-    to: null,
-  })
-  const [errMessage, setErrMessage] = useState({ from: '', to: '' })
-  const [isOpenedModal, setIsOpenedModal] = useState({
-    from: false,
-    to: false,
-  })
+}: IBetweenDates) => {
+  const [range, setRange] = useState<Record<RangeSide, RangeValue>>({ from: undefined, to: undefined })
+  const [errors, setErrors] = useState<Record<RangeSide, string>>({ from: '', to: '' })
+  const [openSide, setOpenSide] = useState<RangeSide | null>(null)
 
-  const handleChangeInputValue = (value: any, name: string) => {
-    let stateValues = { from: val.from, to: val.to }
+  // Values coming from the applied filter take precedence over the local draft.
+  const hasAppliedValues = filterTyping.Values.length > 0
+  const fromDate = toPickerDate(hasAppliedValues ? filterTyping.Values[0] : range.from)
+  const toDate = toPickerDate(hasAppliedValues ? filterTyping.Values[1] : range.to)
 
-    if (value === null) {
-      value = ''
+  const handleChange = (picked: Dayjs | null, side: RangeSide) => {
+    const value: Date | '' = picked ? new Date(picked.valueOf()) : ''
+    const next = { from: range.from ?? '', to: range.to ?? '', [side]: value }
+
+    setErrors({ from: '', to: '' })
+    const hasErrors = validateRangeColumns(next.from, next.to, item, setErrors, translations?.filterAction?.validations)
+    if (hasErrors) {
+      checkIsDisabled(true)
     } else {
-      value = new Date(value.valueOf() as number | string)
-    }
-    if (stateValues.to === undefined) {
-      stateValues.to = ''
-    }
-    if (stateValues.from === undefined) {
-      stateValues.from = ''
-    }
-    setErrMessage({ from: '', to: '' })
-
-    if (name === 'to') {
-      if (!validateRangeColumns(stateValues.from, value, item, setErrMessage, translations?.filterAction.validations)) {
-        handleChangeRange(stateValues.from, value)
-      } else {
-        checkIsDisabled(true)
-      }
-    } else {
-      if (!validateRangeColumns(value, stateValues.to, item, setErrMessage, translations?.filterAction.validations)) {
-        handleChangeRange(value, stateValues.to)
-      } else {
-        checkIsDisabled(true)
-      }
+      handleChangeRange(next.from, next.to)
     }
 
-    if (value) {
-      if (name === 'from') {
-        stateValues = { from: value, to: val.to }
-      } else {
-        stateValues = { from: val.from, to: value }
-      }
-    } else {
-      if (name === 'from') {
-        stateValues = { from: undefined, to: val.to }
-      } else {
-        stateValues = { from: val.from, to: undefined }
-      }
-    }
-    setVal(stateValues)
+    setRange((previous) => ({ ...previous, [side]: value || undefined }))
   }
-  const unFocused = () => {
-    !isDisabled && setColumnName('')
-  }
-  const handleOpenModal = (type: string) => {
+
+  const open = (side: RangeSide) => {
     setColumnName(item.ColumnName)
-    if (type === 'from') {
-      setIsOpenedModal((prev) => {
-        return { ...prev, from: true }
-      })
-    } else {
-      setIsOpenedModal((prev) => {
-        return { ...prev, to: true }
-      })
-    }
+    setOpenSide(side)
   }
-  const handleClose = (type: string) => {
-    !isDisabled && setColumnName('')
-    if (type === 'from') {
-      setIsOpenedModal((prev) => {
-        return { ...prev, from: false }
-      })
-    } else {
-      setIsOpenedModal((prev) => {
-        return { ...prev, to: false }
-      })
-    }
+
+  const close = () => {
+    if (!isDisabled) setColumnName('')
+    setOpenSide(null)
+  }
+
+  const handleBlur = () => {
+    if (!isDisabled) setColumnName('')
   }
 
   useEffect(() => {
     setColumnName(item.ColumnName)
-  }, [val])
-  useEffect(() => {
-    if (item.ColumnName === filterTyping.PropertyName) {
-      let newValues: string[] = filterTyping.Values
-      setVal({ from: newValues[0], to: newValues[1] })
-    }
-  }, [filterTyping])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range])
+
+  // Show the applied filter values when the filter changes.
+  useSyncOnChange(filterTyping, (filter) => {
+    if (item.ColumnName === filter.PropertyName) setRange({ from: filter.Values[0], to: filter.Values[1] })
+  })
+
+  const renderPicker = (side: RangeSide) => (
+    <div
+      style={{ width: '48%', position: 'relative' }}
+      tabIndex={0}
+      onBlur={handleBlur}
+      className={errors[side] ? 'date-picker' : ''}
+    >
+      <DateTimePicker
+        open={openSide === side}
+        onOpen={() => open(side)}
+        onClose={close}
+        closeOnSelect
+        timeSteps={TIME_STEPS}
+        label={side === 'from' ? translations?.filterAction?.from || 'From' : translations?.filterAction?.to || 'To'}
+        ampm={false}
+        slotProps={{ textField: { size: inputSizes }, layout: { sx: PICKER_LAYOUT_SX } }}
+        format='YYYY-MM-DD HH:mm:ss'
+        views={PICKER_VIEWS}
+        // Each side limits the other. `undefined` means "no limit"; `null` crashed the picker.
+        maxDateTime={side === 'from' ? (toDate ?? undefined) : undefined}
+        minDateTime={side === 'to' ? (fromDate ?? undefined) : undefined}
+        disabled={isDisabled && item.ColumnName !== columnName}
+        value={side === 'from' ? fromDate : toDate}
+        onChange={(picked) => handleChange(picked, side)}
+        slots={{ actionBar: ActionList }}
+      />
+      {errors[side] ? <div className='filter-error'>{errors[side]}</div> : null}
+    </div>
+  )
 
   return (
     <div
       className={`G-justify-between ${item.IsBold ? 'IsBold' : ''}`}
-      style={{
-        width: advancedSettings ? columnsSizes : '100%',
-      }}
+      style={{ width: advancedSettings ? columnsSizes : '100%' }}
     >
-      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale}>
-        <div
-          style={{ width: '48%', position: 'relative' }}
-          tabIndex={0}
-          onBlur={unFocused}
-          className={errMessage.from ? 'date-picker' : ''}
-        >
-          <DateTimePicker
-            open={isOpenedModal.from}
-            onOpen={() => handleOpenModal('from')}
-            onClose={() => handleClose('from')}
-            closeOnSelect
-            timeSteps={{ hours: 1, minutes: 1, seconds: 1 }}
-            label={translations?.filterAction.from || 'From'}
-            ampm={false}
-            slotProps={{
-              textField: { size: inputSizes },
-            }}
-            format='YYYY-MM-DD HH:mm:ss'
-            views={['year', 'day', 'hours', 'minutes', 'seconds']}
-            maxDateTime={
-              filterTyping.Values.length ? dayjs(filterTyping.Values[1]) : val.to !== undefined ? dayjs(val.to) : null
-            }
-            disabled={isDisabled && item.ColumnName !== columnName}
-            value={
-              filterTyping.Values.length
-                ? dayjs(filterTyping.Values[0])
-                : val.from !== undefined
-                ? dayjs(val.from)
-                : null
-            }
-            onChange={(newValue: any, e) => handleChangeInputValue(newValue, 'from')}
-            slots={{
-              actionBar: (props) => ActionList(props, translations?.filterAction),
-            }}
-          />
-          {errMessage.from.length ? <div style={{ color: 'red', fontSize: 12 }}>{errMessage.from}</div> : null}
-        </div>
-      </LocalizationProvider>
-      <div className='G-center'>-</div>
-      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale}>
-        <div style={{ width: '48%' }} tabIndex={1} onBlur={unFocused} className={errMessage.to ? 'date-picker' : ''}>
-          <DateTimePicker
-            ampm={false}
-            timeSteps={{ hours: 1, minutes: 1, seconds: 1 }}
-            label={translations?.filterAction.to || 'To'}
-            slotProps={{ textField: { size: inputSizes } }}
-            onOpen={() => handleOpenModal('to')}
-            onClose={() => handleClose('to')}
-            open={isOpenedModal.to}
-            format='YYYY-MM-DD HH:mm:ss'
-            views={['year', 'day', 'hours', 'minutes', 'seconds']}
-            minDateTime={
-              filterTyping.Values.length
-                ? dayjs(filterTyping.Values[0])
-                : val.from !== undefined
-                ? dayjs(val.from)
-                : null
-            }
-            disabled={isDisabled && item.ColumnName !== columnName}
-            value={
-              filterTyping.Values.length ? dayjs(filterTyping.Values[1]) : val.to !== undefined ? dayjs(val.to) : null
-            }
-            onChange={(newValue: any) => handleChangeInputValue(newValue, 'to')}
-            slots={{
-              actionBar: (props) => ActionList(props, translations?.filterAction),
-            }}
-          />
-          {errMessage.to.length ? <div style={{ color: 'red', fontSize: 12 }}>{errMessage.to}</div> : null}
-        </div>
-      </LocalizationProvider>
+      <DateActionTranslationsContext.Provider value={translations?.filterAction}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale ?? undefined}>
+          {renderPicker('from')}
+          <div className='G-center'>-</div>
+          {renderPicker('to')}
+        </LocalizationProvider>
+      </DateActionTranslationsContext.Provider>
     </div>
   )
 }
+
 export default BetweenDates

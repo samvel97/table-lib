@@ -1,71 +1,70 @@
-@import "src/assets/style/variables";
+@use '../../assets/style/variables' as *;
 
-.G-table-actions-header{
-    background-color: white;
-    align-items: center;
-    padding: 32px 0px 16px 0px;
-    // height:55px;
-    .G-checkbox{
-      cursor: pointer;
-      width: 24px;
-      height: 24px;
-      display: block;
+.G-table-actions-header {
+  background-color: white;
+  align-items: center;
+  padding: 32px 0px 16px 0px;
+  // height:55px;
+  .G-checkbox {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: block;
+  }
+  .G-disbled-checkbox {
+    cursor: cell;
+    width: 24px;
+    height: 24px;
+    display: block;
+  }
+  .G-actions {
+    margin-right: 27px;
+    .G-edit {
+      padding: 6px 8px;
+      border-radius: 4px;
+      margin-right: 20px;
+      font-size: 14px;
+      .G-edit-icon {
+        font-size: 20px;
+        gap: 4px;
+        & > span {
+          font-size: 14px;
+        }
+      }
+      &:hover {
+        background-color: $hover-color;
+        cursor: pointer;
+      }
+      .icon-material-symbols_edit {
+        font-size: 16px;
+        margin-right: 10px;
+      }
     }
-    .G-disbled-checkbox{
-      cursor:cell;
-      width: 24px;
-      height: 24px;
-      display: block;
-    }
-    .G-actions{
-        margin-right: 27px;
-        .G-edit{
-            padding: 6px 8px;
-            border-radius: 4px;
-            margin-right: 20px;
-            font-size: 14px;
-            .G-edit-icon{
-                font-size: 20px;
-                gap: 4px;
-                & > span {
-                    font-size: 14px;
-                }
-            }
-            &:hover{
-              background-color: $hover-color;
-              cursor: pointer;
-            }
-            .icon-material-symbols_edit{
-              font-size: 16px;
-              margin-right: 10px;
-            }
-          }
-          .G-delete{
-            padding: 6px 8px;
-            border-radius: 4px;
-            font-size: 14px;
-            .G-delete-icon{
-                font-size: 20px;
-                gap: 4px;
-                & > span {
-                    font-size: 14px;
-                }
-            }
-            &:hover{
-              background-color: $hover-color;
-              cursor: pointer;
-            }
-            &:focus{
-              .icon-material-symbols_delete{
-                color: $active-color;
-                outline: none;
-              }
-            }
-            .icon-material-symbols_delete{
-              font-size: 16px;
-              margin-right: 10px;
-          
-            }
-          }
+    .G-delete {
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      .G-delete-icon {
+        font-size: 20px;
+        gap: 4px;
+        & > span {
+          font-size: 14px;
+        }
+      }
+      &:hover {
+        background-color: $hover-color;
+        cursor: pointer;
+      }
+      &:focus {
+        .icon-material-symbols_delete {
+          color: $active-color;
+          outline: none;
+        }
+      }
+      .icon-material-symbols_delete {
+        font-size: 16px;
+        margin-right: 10px;
+      }
     }
   }
+}

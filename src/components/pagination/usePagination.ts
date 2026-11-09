@@ -1,66 +1,52 @@
 import { useMemo } from 'react'
 
 export const DOTS = '...'
+export type PaginationItem = number | typeof DOTS
 
-const range = (start: number, end: number) => {
-  const length = end - start + 1
-  return Array.from({ length }, (_, idx) => idx + start)
+const range = (start: number, end: number) => Array.from({ length: end - start + 1 }, (_, i) => start + i)
+
+interface PaginationOptions {
+  /** Total number of rows (not pages). */
+  totalCount: number
+  pageSize: number
+  currentPage: number
+  /** Pages shown on each side of the current page. */
+  siblingCount?: number
 }
 
-interface IUsePagination {
+/**
+ * Page buttons to render, e.g. `[1, '...', 4, 5, 6, '...', 20]`.
+ * Always returns an array; v7 could return `undefined`.
+ */
+export function getPaginationRange({ totalCount, pageSize, currentPage, siblingCount = 1 }: PaginationOptions) {
+  const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(1, pageSize)))
+  // first + last + current + 2 * siblings + 2 * dots
+  const maxButtons = siblingCount * 2 + 5
+  if (totalPages <= maxButtons) return range(1, totalPages) as PaginationItem[]
+
+  const left = Math.max(currentPage - siblingCount, 1)
+  const right = Math.min(currentPage + siblingCount, totalPages)
+  const showLeftDots = left > 2
+  const showRightDots = right < totalPages - 2
+  const edgeCount = 3 + 2 * siblingCount
+
+  if (!showLeftDots) return [...range(1, edgeCount), DOTS, totalPages] as PaginationItem[]
+  if (!showRightDots) return [1, DOTS, ...range(totalPages - edgeCount + 1, totalPages)] as PaginationItem[]
+  return [1, DOTS, ...range(left, right), DOTS, totalPages] as PaginationItem[]
+}
+
+export const usePagination = ({
+  totalCount,
+  pageSizeStructure,
+  siblingCount = 1,
+  currentPage,
+}: {
   totalCount: number
   pageSizeStructure: number
-  siblingCount: number
+  siblingCount?: number
   currentPage: number
-}
-
-export const usePagination = ({ totalCount, pageSizeStructure, siblingCount = 1, currentPage }: IUsePagination) => {
-  //@ts-ignore
-  return useMemo(() => {
-    const totalPageCount = Math.ceil(totalCount / pageSizeStructure)
-
-    // Pages count is determined as siblingCount + firstPage + lastPage + currentPage + 2*DOTS
-    const totalPageNumbers = siblingCount + 5
-
-    /*
-      If the number of pages is less than the page numbers we want to show in our
-      paginationComponent, we return the range [1..totalPageCount]
-    */
-
-    if (totalPageNumbers >= totalPageCount) {
-      return range(1, totalPageCount)
-    }
-
-    const leftSiblingIndex = Math.max(currentPage - siblingCount, 1)
-    const rightSiblingIndex = Math.min(currentPage + siblingCount, totalPageCount)
-
-    /*
-      We do not want to show dots if there is only one position left
-      after/before the left/right page count as that would lead to a change if our Pagination
-      component size which we do not want
-    */
-    const shouldShowLeftDots = leftSiblingIndex > 2
-    const shouldShowRightDots = rightSiblingIndex < totalPageCount - 2
-
-    const firstPageIndex = 1
-    const lastPageIndex = totalPageCount
-
-    if (!shouldShowLeftDots && shouldShowRightDots) {
-      const leftItemCount = 3 + 2 * siblingCount
-      const leftRange = range(1, leftItemCount)
-
-      return [...leftRange, DOTS, totalPageCount]
-    }
-
-    if (shouldShowLeftDots && !shouldShowRightDots) {
-      const rightItemCount = 3 + 2 * siblingCount
-      const rightRange = range(totalPageCount - rightItemCount + 1, totalPageCount)
-      return [firstPageIndex, DOTS, ...rightRange]
-    }
-
-    if (shouldShowLeftDots && shouldShowRightDots) {
-      const middleRange = range(leftSiblingIndex, rightSiblingIndex)
-      return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex]
-    }
-  }, [totalCount, pageSizeStructure, siblingCount, currentPage])
-}
+}) =>
+  useMemo(
+    () => getPaginationRange({ totalCount, pageSize: pageSizeStructure, currentPage, siblingCount }),
+    [totalCount, pageSizeStructure, siblingCount, currentPage],
+  )

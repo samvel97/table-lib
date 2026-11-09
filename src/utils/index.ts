@@ -1,5 +1,6 @@
+import dayjs, { type Dayjs } from 'dayjs'
 import { ColumnTypeEnums } from '../Models/table.enum'
-import { ItemFields } from '../Models/table.models'
+import { type ItemFields } from '../Models/table.models'
 
 export const containsOnlyNumbers = (value: string) => {
   return /^-?\d*\.?\d+$/.test(value) || value.trim() === ''
@@ -12,7 +13,7 @@ export const formatPrice = (num: number, symbol: string, isPrice = false, fixedC
     p[0]
       .split('')
       .reverse()
-      .reduce(function (acc, num, i, orig) {
+      .reduce(function (acc, num, i) {
         return num + (num !== '-' && i && !(i % 3) ? ',' : '') + acc
       }, '') +
     (p[1] ? '.' + p[1] : '') +
@@ -116,13 +117,43 @@ export const filterUiHelper = (ColumnType: string, ComparisonType: string) => {
   return 0
 }
 
+/**
+ * Convert a filter value (Date, ISO string, Dayjs) into a value the date pickers accept.
+ * Empty and unparsable input becomes `null` ("no date") instead of an Invalid Date.
+ */
+export const toPickerDate = (value: unknown): Dayjs | null => {
+  if (value === null || value === undefined || value === '') return null
+  const date = dayjs(value as string | number | Date | Dayjs)
+  return date.isValid() ? date : null
+}
+
+export interface RangeValidationMessages {
+  isEmpty: string
+  onlyNumbers: string
+  err: string
+  invalid: string
+}
+
+const DEFAULT_RANGE_MESSAGES: RangeValidationMessages = {
+  isEmpty: 'Required',
+  onlyNumbers: 'Only numbers are allowed',
+  err: '"To" must be greater than "From"',
+  invalid: 'Invalid date',
+}
+
+/**
+ * Validate a "Between" range. Writes per-side messages through `setErrorMessage`
+ * and returns `true` when the range has errors.
+ */
 export const validateRangeColumns = (
   from: any,
   to: any,
   item: any,
-  setErrorMessage: (option: any) => void,
-  errMessages?: any,
+  setErrorMessage: (option: { from: string; to: string }) => void,
+  messages?: Partial<RangeValidationMessages>,
 ) => {
+  // Without translations, the old code threw "Cannot read properties of undefined".
+  const errMessages = { ...DEFAULT_RANGE_MESSAGES, ...messages }
   let isValid = false
   const columnError = { from: '', to: '' }
   if (from == undefined && to !== undefined && item.ColumnType === 'Date') {
@@ -141,11 +172,11 @@ export const validateRangeColumns = (
     columnError.to = errMessages.onlyNumbers
     isValid = true
   }
-  if (from !== null && isNaN(from.valueOf() as number) && item.ColumnType === 'Date') {
+  if (from != null && from !== '' && isNaN(from.valueOf() as number) && item.ColumnType === 'Date') {
     columnError.from = errMessages.invalid
     isValid = true
   }
-  if (to !== null && isNaN(to.valueOf() as number) && item.ColumnType === 'Date') {
+  if (to != null && to !== '' && isNaN(to.valueOf() as number) && item.ColumnType === 'Date') {
     columnError.to = errMessages.invalid
     isValid = true
   }

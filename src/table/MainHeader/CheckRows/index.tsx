@@ -4,7 +4,7 @@ import Checkbox from '../../../components/checkbox'
 import PopUp from '../../../components/popUp'
 import DropdownSvgIcon from '../../../svgIcons/DropdownSvgIcon'
 import './style.scss'
-interface ICheckRows<T extends Object> {
+interface ICheckRows<T extends object> {
   data: T[]
   checkedRows: T[]
   translations?: Record<string, any>
@@ -24,7 +24,7 @@ const dropdownStyle = {
   minWidth: 10,
   border: 'none',
 }
-const CheckRows = <T extends Object>({
+const CheckRows = <T extends object>({
   data,
   checkedRows,
   translations,
@@ -42,7 +42,7 @@ const CheckRows = <T extends Object>({
     setAnchorEl(null)
   }
 
-  const [listForDropdown] = useState<Object[]>([
+  const [listForDropdown] = useState<object[]>([
     {
       id: 1,
       title: translations?.checkbox.all || CheckedItems.SELECTED_ALL,

@@ -1,17 +1,21 @@
-import React, { memo, useEffect, useMemo, useState } from 'react'
-import { IPageSizes, ISelected } from '../../Models/table.models'
+import { memo, useState } from 'react'
+import type { IPageSizes, ISelected } from '../../Models/table.models'
 import Pagination from '../../components/pagination'
 import Select from '../../components/select/select'
 import DropdownSvgIcon from '../../svgIcons/DropdownSvgIcon'
 import './index.scss'
+
 interface IFooterPagination {
   pageSizeStructure?: IPageSizes[]
+  /** Total number of rows (named `pagesTotalCount` on the Table for backwards compatibility). */
   pagesTotalCount?: number
   currPage?: number
   selectedPageSizeId?: ISelected
   translations?: Record<string, any>
   getPageRowsCountAndCurrentPage?(pageNumber: number, rowsCount: IPageSizes): void
 }
+
+/** "1-10 of 57", page-size select and page buttons. */
 const FooterPagination = ({
   pageSizeStructure,
   pagesTotalCount = 0,
@@ -20,73 +24,70 @@ const FooterPagination = ({
   translations,
   getPageRowsCountAndCurrentPage,
 }: IFooterPagination) => {
-  const [isOpenList, setOpen] = useState<boolean>(false)
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const [selectedPage, setSelectedPage] = useState<ISelected>(selectedPageSizeId)
-
-  const setIsOpenList = () => {
-    setOpen((prev) => !prev)
-  }
-  const handleSelectItem = (options: IPageSizes) => {
-    setSelectedPage({ id: options.id })
-    setCurrentPage(1)
-    if (pageSizeStructure && selectedPage && getPageRowsCountAndCurrentPage) {
-      getPageRowsCountAndCurrentPage(1, pageSizeStructure[options.id - 1])
-    }
-  }
-  const handleChangePage = (option: number) => {
-    setCurrentPage(option)
-    if (pageSizeStructure && selectedPage && getPageRowsCountAndCurrentPage) {
-      getPageRowsCountAndCurrentPage(option, pageSizeStructure[selectedPage.id - 1])
-    }
+  const [isOpenList, setIsOpenList] = useState(false)
+  // The page and page size are controlled by the parent; local state only covers the moment between
+  // a click and the parent re-rendering with the new value.
+  const [pendingPage, setPendingPage] = useState<number | null>(null)
+  const [pendingSizeId, setPendingSizeId] = useState<number | null>(null)
+  const [lastProps, setLastProps] = useState({ currPage, sizeId: selectedPageSizeId.id })
+  if (lastProps.currPage !== currPage || lastProps.sizeId !== selectedPageSizeId.id) {
+    setLastProps({ currPage, sizeId: selectedPageSizeId.id })
+    setPendingPage(null)
+    setPendingSizeId(null)
   }
 
-  const dataInfo = useMemo(() => {
-    if (pageSizeStructure) {
-      const fromCount =
-        pagesTotalCount < currentPage * pageSizeStructure?.[selectedPage.id - 1].count
-          ? pagesTotalCount
-          : currentPage * pageSizeStructure?.[selectedPage.id - 1].count
-      const infoMessage =
-        (currentPage - 1) * pageSizeStructure?.[selectedPage.id - 1].count +
-        1 +
-        '-' +
-        fromCount +
-        (` ${translations?.pagination.from} ` || ' from ') +
-        pagesTotalCount
-      return infoMessage
-    }
-  }, [pageSizeStructure, currentPage, selectedPage.id, pagesTotalCount])
+  const currentPage = pendingPage ?? currPage
+  const sizeId = pendingSizeId ?? selectedPageSizeId.id
+  // Look sizes up by id; v7 used `pageSizeStructure[id - 1]`, which assumed ids 1..n in order.
+  const pageSize = pageSizeStructure?.find((size) => size.id === sizeId) ?? pageSizeStructure?.[0]
 
-  useEffect(() => {
-    if (currentPage !== currPage) setCurrentPage(currPage)
-  }, [currPage])
+  const changePageSize = (size: IPageSizes) => {
+    setPendingSizeId(size.id)
+    setPendingPage(1)
+    getPageRowsCountAndCurrentPage?.(1, size)
+  }
+
+  const changePage = (page: number) => {
+    setPendingPage(page)
+    if (pageSize) getPageRowsCountAndCurrentPage?.(page, pageSize)
+  }
+
+  const rangeText = (() => {
+    if (!pageSize) return null
+    const first = (currentPage - 1) * pageSize.count + 1
+    const last = Math.min(currentPage * pageSize.count, pagesTotalCount)
+    // v7 printed "undefined" here when no translations were passed.
+    const of = translations?.pagination?.from ?? 'from'
+    return `${first}-${last} ${of} ${pagesTotalCount}`
+  })()
 
   return (
     <>
-      <div className='G-count-info'>{dataInfo}</div>
-      {pageSizeStructure && selectedPage ? (
+      <div className='G-count-info' aria-live='polite'>
+        {rangeText}
+      </div>
+      {pageSizeStructure && pageSize ? (
         <div className='G-justify-between G-align-center'>
-          <div className='G-select-text'>{translations?.pagination.show || 'Show'}</div>
+          <div className='G-select-text'>{translations?.pagination?.show || 'Show'}</div>
           <Select
             optionsList={pageSizeStructure}
-            value={selectedPage.id}
-            selectedNameKey={'count'}
-            selectedValueKey={'id'}
-            onChange={handleSelectItem}
+            value={pageSize.id}
+            selectedNameKey='count'
+            selectedValueKey='id'
+            onChange={changePageSize}
             isOpenList={isOpenList}
-            setIsOpenList={setIsOpenList}
+            setIsOpenList={() => setIsOpenList((open) => !open)}
             customClass='G-Select-container'
             ButtonSvg={DropdownSvgIcon}
           />
-          <div className='G-select-text'>{translations?.pagination.rows || 'Rows'}</div>
+          <div className='G-select-text'>{translations?.pagination?.rows || 'Rows'}</div>
           <Pagination
-            onPageChange={handleChangePage}
+            onPageChange={changePage}
             totalCount={pagesTotalCount}
             currentPage={currentPage}
             translations={translations}
-            pageSizeStructure={pageSizeStructure && selectedPage ? pageSizeStructure[selectedPage.id - 1].count : 15}
-            className={'G-pagionation'}
+            pageSizeStructure={pageSize.count}
+            className='G-pagionation'
           />
         </div>
       ) : null}

@@ -1,13 +1,13 @@
 import React from 'react'
 import { StructureConfig } from '../../../../Models/table.enum'
 import {
-  IColumnConfig,
-  IColumnConfigStructure,
-  IColumnHeader,
-  IColumnHeaderStructure,
+  type IColumnConfig,
+  type IColumnConfigStructure,
+  type IColumnHeader,
+  type IColumnHeaderStructure,
 } from '../../../../Models/table.models'
 
-interface ITopMain<T extends Object> {
+interface ITopMain<T extends object> {
   columnsHeaderStructure: IColumnHeaderStructure
   columnsConfigStructure: IColumnConfigStructure<T>
   columnMinWidth?: number
@@ -17,7 +17,7 @@ interface ITopMain<T extends Object> {
   leftFreezedColumnWidth?: number
   handleSorting?(option: string): void
 }
-const HeaderMain = <T extends Object>({
+const HeaderMain = <T extends object>({
   columnsHeaderStructure,
   columnsConfigStructure,
   columnMinWidth,

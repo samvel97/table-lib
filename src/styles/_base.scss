@@ -1,0 +1,109 @@
+// Element reset for the table's own markup. Loaded inside `.brt-root`, so it never touches the host app.
+// (v7 applied these resets, plus `* { outline: none }` and a forced body font, to the whole page.)
+
+div,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ol,
+ul,
+li,
+form,
+label,
+i,
+a,
+table,
+thead,
+tbody,
+tfoot,
+tr,
+th,
+td,
+section,
+header,
+footer,
+strong,
+em,
+small {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
+  appearance: none;
+}
+
+a {
+  display: inline-block;
+  text-decoration: none;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  position: relative;
+}
+
+input,
+button,
+select,
+textarea {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+// Visible focus for keyboard users (v7 removed every outline on the page).
+:focus-visible {
+  outline: 2px solid #4844c5;
+  outline-offset: 1px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(206, 216, 221, 0.5);
+  border-radius: 20px;
+
+  &:hover {
+    background-color: #acbcc3;
+  }
+}
+
+// v7 sized every svg on the page this way; kept for the table's own icons only.
+svg {
+  height: 100%;
+}

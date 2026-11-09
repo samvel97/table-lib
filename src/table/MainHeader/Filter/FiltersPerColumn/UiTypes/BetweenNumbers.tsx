@@ -1,8 +1,9 @@
+import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
 import React, { useEffect, useState } from 'react'
 import { TextField } from '@mui/material'
-import { IComparisonType, ItemFields } from '../../../../../Models/table.models'
+import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
 import { validateRangeColumns } from '../../../../../utils'
-import { ColumnTypeEnums, inputSize } from '../../../../../Models/table.enum'
+import { ColumnTypeEnums, type inputSize } from '../../../../../Models/table.enum'
 interface IBetweenNumbers {
   columnsSizes: string
   item: IComparisonType
@@ -37,7 +38,7 @@ const BetweenNumbers = ({
   })
 
   const handleChangeInputValue = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const stateValues = val
+    const stateValues = { ...val }
     const { value, name } = event.target
     if (stateValues.to === undefined) {
       stateValues.to = ''
@@ -88,15 +89,13 @@ const BetweenNumbers = ({
     }
     return ''
   }
-  useEffect(() => {
-    if (item.ColumnName === filterTyping.PropertyName) {
-      let newValues: string[] = filterTyping.Values
-      if (item.ColumnType !== ColumnTypeEnums.Text) {
-        newValues = filterTyping.Values.map((item: number) => item + '')
-      }
-      setVal({ from: newValues[0], to: newValues[1] })
-    }
-  }, [filterTyping])
+  // Show the applied filter values when the filter changes.
+  useSyncOnChange(filterTyping, (filter) => {
+    if (item.ColumnName !== filter.PropertyName) return
+    const values: string[] =
+      item.ColumnType === ColumnTypeEnums.Text ? filter.Values : filter.Values.map((value: number) => String(value))
+    setVal({ from: values[0], to: values[1] })
+  })
 
   useEffect(() => {
     if (!isEnabled.isEnabledFrom && !isEnabled.isEnabledTo && errMessage.from == '' && errMessage.to == '') {

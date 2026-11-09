@@ -1,24 +1,25 @@
+import type { ReactElement } from 'react'
 import React from 'react'
 import ColumnsCustomizer from './ColumnsCustomizer'
 import {
-  IColumnConfigStructure,
-  IColumnHeaderStructure,
-  IColumnTotalStructure,
-  IComparisonType,
-  IFiltersTypes,
-  IPageSizes,
-  ISelect,
-  ISelected,
-  ItemFields,
+  type IColumnConfigStructure,
+  type IColumnHeaderStructure,
+  type IColumnTotalStructure,
+  type IComparisonType,
+  type IFiltersTypes,
+  type IPageSizes,
+  type ISelect,
+  type ISelected,
+  type ItemFields,
 } from '../../Models/table.models'
 import CheckRows from './CheckRows'
 import DeleteSvgIcon from '../../svgIcons/DeleteSvgIcon'
 import EditSvgIcon from '../../svgIcons/EditSvgIcon'
 import Filter from './Filter'
 import Download from './Download'
-import { CheckedItems, ColumnTypeEnums } from '../../Models/table.enum'
+import { CheckedItems, type ColumnTypeEnums } from '../../Models/table.enum'
 import './style.scss'
-interface IActionsHeader<T extends Object> {
+interface IActionsHeader<T extends object> {
   columnsConfigStructure: IColumnConfigStructure<T>
   columnsHeaderStructure: IColumnHeaderStructure
   selectedPageCount?: ISelected
@@ -51,11 +52,11 @@ interface IActionsHeader<T extends Object> {
   getFilteredDataForTable?(option: ItemFields[]): void
   handleChangePagePerFilterField?(option: ItemFields): void
   getDownloadType?: (option: string, checkedRows: T[] | string) => void
-  customHeaderAction?(option: T[] | string): JSX.Element
+  customHeaderAction?(option: T[] | string): ReactElement
   handleDeleteAll?: () => void
-  staticAction?(): JSX.Element
+  staticAction?(): ReactElement
 }
-const MainHeader = <T extends Object>({
+const MainHeader = <T extends object>({
   columnsConfigStructure,
   columnsHeaderStructure,
   multipleCheck,
@@ -63,9 +64,7 @@ const MainHeader = <T extends Object>({
   checkedRows,
   draggableColumns,
   filterColumns,
-  perColumnListForFilters,
   filterDataForRequest,
-  isLoadingFilters,
   filtersTypes,
   selectedType,
   perColumnTotalCount,
@@ -85,7 +84,6 @@ const MainHeader = <T extends Object>({
   getFilteredDataForTable,
   getDownloadType,
   customHeaderAction,
-  handleDeleteAll,
   staticAction,
 }: IActionsHeader<T>) => {
   return (

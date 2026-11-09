@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react'
 import React, { memo, useState } from 'react'
 import Select from '../../../components/select/select'
 import ArrowDown from '../../../svgIcons/ArrowBottomSvgIcon'
@@ -8,13 +9,13 @@ interface IDownloadTypes {
   id: number
   type: string
 }
-interface IDownload<T extends Object> {
+interface IDownload<T extends object> {
   checkedRows: T[]
   selectedType: string
   translations?: Record<string, any>
   getDownloadType: (option: string, checkedRows: T[] | string) => void
 }
-const Download = <T extends Object>({ checkedRows, selectedType, translations, getDownloadType }: IDownload<T>) => {
+const Download = <T extends object>({ checkedRows, selectedType, translations, getDownloadType }: IDownload<T>) => {
   const [fileType] = useState<IDownloadTypes[]>([
     { id: 1, type: 'XLSX' },
     { id: 2, type: 'CSV' },
@@ -49,4 +50,4 @@ const Download = <T extends Object>({ checkedRows, selectedType, translations, g
   )
 }
 
-export default memo(Download) as <T extends Object>(props: IDownload<T>) => JSX.Element
+export default memo(Download) as <T extends object>(props: IDownload<T>) => ReactElement

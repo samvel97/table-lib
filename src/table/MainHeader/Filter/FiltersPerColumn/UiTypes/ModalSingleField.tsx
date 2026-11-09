@@ -1,7 +1,8 @@
+import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
 import { Autocomplete, Button, CircularProgress, Skeleton, TextField } from '@mui/material'
-import React, { useEffect, useState } from 'react'
-import { ColumnTypeEnums, ConditionalOperatorsEnums, inputSize } from '../../../../../Models/table.enum'
-import { IComparisonType, ItemFields } from '../../../../../Models/table.models'
+import React, { Fragment, useState } from 'react'
+import { ColumnTypeEnums, ConditionalOperatorsEnums, type inputSize } from '../../../../../Models/table.enum'
+import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
 import { containsOnlyNumbers } from '../../../../../utils'
 import './style.scss'
 
@@ -49,7 +50,6 @@ const ModalForSingleField = ({
   const [val, setVal] = useState<string>('')
   const [errMessage, setErrMessage] = useState<string>('')
   const [isOpened, setIsOpened] = useState<boolean>(false)
-  const [isLoadedMoreData, setIsLoadedMoreData] = useState<boolean>(false)
   const handleOpenList = () => {
     if (!isDisabled) {
       setColumnName(item.ColumnName)
@@ -59,10 +59,9 @@ const ModalForSingleField = ({
   const handleCloseList = () => {
     setColumnName('')
     setVal('')
-    setIsLoadedMoreData(false)
     setIsOpened(false)
     if (item.ColumnType !== ColumnTypeEnums.Text && item.ColumnType !== ColumnTypeEnums.TikoType) {
-      let newValues: number[] = []
+      const newValues: number[] = []
       checkedItems.map((item) => newValues.push(+item))
       handleSelectItems(newValues, false)
       setCheckedItemsLocaly(newValues)
@@ -72,12 +71,10 @@ const ModalForSingleField = ({
     }
   }
   const selectValue = (event: React.SyntheticEvent, value: any[]) => {
-    setIsLoadedMoreData(false)
     const selectedValue: string[] = value.length ? [value.at(-1)] : []
     setCheckedItems(selectedValue)
     if (item.ColumnType !== ColumnTypeEnums.Text && item.ColumnType !== ColumnTypeEnums.TikoType) {
-      let newValues: number[] = []
-      newValues = selectedValue.map((item: string) => +item)
+      const newValues: number[] = selectedValue.map((item: string) => +item)
       if (!isOpened) {
         handleSelectItems(newValues, false)
       }
@@ -99,7 +96,6 @@ const ModalForSingleField = ({
       setVal(newInputValue)
       return
     }
-    setIsLoadedMoreData(false)
     setErrMessage('')
     handleChangeValue(newInputValue)
     setVal(newInputValue)
@@ -137,15 +133,12 @@ const ModalForSingleField = ({
     TypeForUi: ConditionalOperatorsEnums['>' as keyof typeof ConditionalOperatorsEnums],
     ColumnType: item.ColumnType,
   }
-  useEffect(() => {
-    if (item.ColumnName === filterTyping.PropertyName) {
-      let newValues: string[] = filterTyping.CheckedItems
-      if (item.ColumnType !== ColumnTypeEnums.Text && item.ColumnType !== ColumnTypeEnums.TikoType) {
-        newValues = filterTyping.CheckedItems.map((item: number) => item + '')
-      }
-      setCheckedItems(newValues)
-    }
-  }, [filterTyping])
+  // Show the applied filter values when the filter changes.
+  useSyncOnChange(filterTyping, (filter) => {
+    if (item.ColumnName !== filter.PropertyName) return
+    const keepsText = item.ColumnType === ColumnTypeEnums.Text || item.ColumnType === ColumnTypeEnums.TikoType
+    setCheckedItems(keepsText ? filter.CheckedItems : filter.CheckedItems.map((value: number) => String(value)))
+  })
   return (
     <div
       style={{
@@ -169,14 +162,14 @@ const ModalForSingleField = ({
         fullWidth
         freeSolo
         size={inputSizes}
-        filterOptions={(options, state) => options}
+        filterOptions={(options) => options}
         sx={{ height: 'max-content' }}
-        renderOption={(props, option, { selected }) => {
+        renderOption={({ key, ...optionProps }, option) => {
           if (option !== '')
             return (
-              <div key={props.id} style={{ textAlign: 'center' }}>
+              <Fragment key={key}>
                 <li
-                  {...props}
+                  {...optionProps}
                   style={{
                     marginLeft: 5,
                     display: 'flex',
@@ -202,7 +195,7 @@ const ModalForSingleField = ({
                   )}
                 </li>
                 {option === perColumnListForFilters?.at(-1) ? (
-                  <div className='G-center' style={{ width: '100%' }}>
+                  <li className='G-center' role='presentation' style={{ width: '100%' }}>
                     {perColumnTotalCount && perColumnListForFilters.length < perColumnTotalCount ? (
                       <Button
                         size='large'
@@ -215,15 +208,14 @@ const ModalForSingleField = ({
                         }}
                         onClick={() => {
                           handleChangePagePerFilterField?.(nextPageOption)
-                          setIsLoadedMoreData(true)
                         }}
                       >
                         {translations?.filterAction.loadMore || 'Load more'}
                       </Button>
                     ) : null}
-                  </div>
+                  </li>
                 ) : null}
-              </div>
+              </Fragment>
             )
         }}
         renderInput={(params) => (

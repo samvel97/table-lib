@@ -1,17 +1,8 @@
-import React, { useState } from 'react'
-import {
-  IColumnConfigStructure,
-  IColumnHeaderStructure,
-  IColumnTotalStructure,
-  ITotalList,
-} from '../../../../Models/table.models'
-import { Button, Menu } from '@mui/material'
+import { type IColumnConfigStructure, type IColumnHeaderStructure } from '../../../../Models/table.models'
 import FreezedItems from './FreezedItems'
 import './style.scss'
 import { StructureConfig } from '../../../../Models/table.enum'
-import ArrowTopSvgIcon from '../../../../svgIcons/ArrowtopSvgIcon'
-import ArrowBottomSvgIcon from '../../../../svgIcons/ArrowBottomSvgIcon'
-interface IFooterFreezedLeft<T extends Object> {
+interface IFooterFreezedLeft<T extends object> {
   columnsHeaderStructure: IColumnHeaderStructure
   columnsConfigStructure: IColumnConfigStructure<T>
   columnMinWidth?: number
@@ -24,7 +15,7 @@ interface IFooterFreezedLeft<T extends Object> {
   handleArgChange?(columnName: string, type: string): void
 }
 
-const FooterFreezedLeft = <T extends Object>({
+const FooterFreezedLeft = <T extends object>({
   columnsConfigStructure,
   columnMinWidth,
   footerColor,

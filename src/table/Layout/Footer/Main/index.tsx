@@ -1,18 +1,14 @@
 import React from 'react'
 import {
-  IColumnConfig,
-  IColumnConfigStructure,
-  IColumnHeader,
-  IColumnHeaderStructure,
-  IColumnTotalStructure,
-  ITotalList,
+  type IColumnConfig,
+  type IColumnConfigStructure,
+  type IColumnHeader,
+  type IColumnHeaderStructure,
 } from '../../../../Models/table.models'
-import { Button, Menu } from '@mui/material'
-import { useState } from 'react'
 import './style.scss'
 import { StructureConfig } from '../../../../Models/table.enum'
 
-interface IFooterMain<T extends Object> {
+interface IFooterMain<T extends object> {
   columnsHeaderStructure: IColumnHeaderStructure
   columnsConfigStructure: IColumnConfigStructure<T>
   columnMinWidth?: number
@@ -24,7 +20,7 @@ interface IFooterMain<T extends Object> {
   multipleCheck?: boolean
   handleArgChange?(columnName: string, type: string): void
 }
-const FooterMain = <T extends Object>({
+const FooterMain = <T extends object>({
   columnsConfigStructure,
   columnMinWidth,
   footerColor,
@@ -48,7 +44,6 @@ const FooterMain = <T extends Object>({
         ></li>
       ) : null}
       {columnsHeaderStructure[StructureConfig.Main].items.map((item: IColumnHeader, index: number) =>
-        //@ts-ignore
         columnsConfigStructure[StructureConfig.Main].items.map((column: IColumnConfig<T>, indexx: number) => {
           if (index === indexx) {
             return (

@@ -1,62 +1,69 @@
-import React from 'react'
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import './style.scss'
-enum CheckBoxEnum {
-  primary,
-  secondary,
 
-  'G-checkbox-primary' = CheckBoxEnum.primary,
-  'G-checkbox-secondary' = CheckBoxEnum.secondary,
-}
+type CheckboxVariant = 'primary' | 'secondary'
 
 interface ICheckbox {
-  isDisable?: boolean
   isCheck: boolean
-
+  isDisable?: boolean
   onClick?(): void
-
-  hasIcon?: boolean
-  iconClass?: string
   label?: string
-  customClass?: string | ''
-  checkboxType?: CheckBoxEnum
-  children?: React.ReactNode
+  /** Accessible name when there is no visible label (e.g. row selection). */
+  ariaLabel?: string
+  customClass?: string
+  variant?: CheckboxVariant
+  children?: ReactNode
 }
 
+/**
+ * Custom-styled checkbox. Rendered with `role="checkbox"`, focusable and toggled with Space or Enter,
+ * so it works with a keyboard and screen readers (v7 was a clickable div only).
+ */
 const Checkbox = ({
+  isCheck,
   isDisable,
   onClick,
-  customClass,
   label,
-  checkboxType = CheckBoxEnum.primary,
-  isCheck,
+  ariaLabel,
+  customClass = '',
+  variant = 'primary',
   children,
 }: ICheckbox) => {
-  function handleClick(e: React.MouseEvent<HTMLElement>) {
-    e.stopPropagation()
-    if (!isDisable) {
-      if ((e.target as HTMLInputElement).tagName !== 'A') onClick && onClick()
+  const toggle = () => {
+    if (!isDisable) onClick?.()
+  }
+
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
+    // Links inside the label keep their own behavior.
+    if ((event.target as HTMLElement).tagName !== 'A') toggle()
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault()
+      event.stopPropagation()
+      toggle()
     }
   }
 
   return (
     <div
+      role='checkbox'
+      aria-checked={isCheck}
+      aria-disabled={isDisable || undefined}
+      aria-label={ariaLabel ?? label}
+      tabIndex={isDisable ? -1 : 0}
       onClick={handleClick}
-      className={`G-checkbox-component G-inline-flex G-align-center G-justify-start ${customClass ? customClass : ''}`}
+      onKeyDown={handleKeyDown}
+      className={`G-checkbox-component G-inline-flex G-align-center G-justify-start ${customClass}`}
     >
       <div
-        className={`G-checkbox G-flex G-flex-column ${isDisable || isCheck ? 'G-active-checkbox' : ''} ${
-          CheckBoxEnum[checkboxType]
-        } ${isDisable ? 'G-disable-checkbox' : ''} `}
+        className={`G-checkbox G-flex G-flex-column ${isDisable || isCheck ? 'G-active-checkbox' : ''} G-checkbox-${variant} ${
+          isDisable ? 'G-disable-checkbox' : ''
+        }`}
       />
-      {/* <span className={`G-active-checkbox-secondary-top`} />
-        <span className={`G-active-checkbox-secondary-bottom`} />
-        <span
-          className={`G-checkbox-mark ${
-            isCheck ? " G-checkbox-mark-active" : ""
-          }`}
-        /> */}
-      {/* </div> */}
-      {children ? children : <p>{label}</p>}
+      {children ?? (label ? <p>{label}</p> : null)}
     </div>
   )
 }

@@ -12,18 +12,18 @@ export enum CheckedItems {
 export type inputSize = 'small' | 'medium'
 
 export enum filterTypesUiHelper {
-  'Equal' = '=',
-  'NotEqual' = '!=',
-  'Contains' = 'Contains',
-  'NotContains' = 'Not Contains',
-  'StartsWith' = 'Starts with',
-  'EndsWith' = 'Ends with',
-  'Between' = 'Between',
-  'GreaterThan' = '>',
-  'GreaterThanOrEqual' = '>=',
-  'LessThan' = '<',
-  'LessThanOrEqual' = '<=',
-  'In' = 'In',
+  Equal = '=',
+  NotEqual = '!=',
+  Contains = 'Contains',
+  NotContains = 'Not Contains',
+  StartsWith = 'Starts with',
+  EndsWith = 'Ends with',
+  Between = 'Between',
+  GreaterThan = '>',
+  GreaterThanOrEqual = '>=',
+  LessThan = '<',
+  LessThanOrEqual = '<=',
+  In = 'In',
 }
 
 export enum ConditionalOperatorsEnums {

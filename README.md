@@ -1,380 +1,227 @@
-# React App Table
+# beautiful-react-table
 
-beautiful-react-table is a customizable table component for React applications. It provides a flexible and feature-rich table implementation with various configuration options.
+A feature-rich data table for React, built for admin panels: column customization with drag and drop,
+frozen rows and columns, server-side filters, totals, row actions, selection, downloads and pagination.
 
-# Installation
+[![npm](https://img.shields.io/npm/v/beautiful-react-table.svg)](https://www.npmjs.com/package/beautiful-react-table)
+![React 18 | 19](https://img.shields.io/badge/react-18%20%7C%2019-61dafb)
+![MUI 5 | 6 | 7](https://img.shields.io/badge/mui-5%20%7C%206%20%7C%207-007fff)
+![TypeScript](https://img.shields.io/badge/types-included-3178c6)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-To install beautiful-react-table, use the following command:
+![Table with hover actions, totals row and pagination](https://raw.githubusercontent.com/PandaTechAM/web-lib-panda-table/main/docs/table.jpg)
 
-npm install beautiful-react-table
-npm install react-beautiful-dnd
-npm install @mui/material
+## Features
 
-# Usage
+- **Column customization**: show/hide, reorder and pin up to three columns by drag and drop (mouse or keyboard)
+- **Frozen rows**: pin up to three rows to the top while scrolling
+- **Filters panel**: text, number and date-range filters, multi-select values with "load more", basic and advanced mode
+- **Selection**: per-row checkboxes plus "select visible / select all / none"
+- **Row actions** on hover, a sticky right column with a dropdown menu or a custom action
+- **Totals footer** with per-column content
+- **Pagination** with page-size select and "go to page"
+- **Download** menu (XLSX / CSV) for checked rows or everything
+- Fully **typed** (`<Table<Order> />`), keyboard accessible controls, works with **React 18 and 19** and **MUI 5, 6 and 7**
 
-Import the necessary components and interfaces from the "beautiful-react-table" package:
+![Filters panel with a date range picker](https://raw.githubusercontent.com/PandaTechAM/web-lib-panda-table/main/docs/filters.jpg)
 
-```JSX
+## Installation
 
-import { useState } from "react";
+```bash
+npm install beautiful-react-table @mui/material @emotion/react @emotion/styled
+```
+
+| Peer dependency                         | Supported versions                 |
+| --------------------------------------- | ---------------------------------- |
+| `react`, `react-dom`                    | `^18.0.0 \|\| ^19.0.0`             |
+| `@mui/material`                         | `^5.15.14 \|\| ^6.0.0 \|\| ^7.0.0` |
+| `@emotion/react`, `@emotion/styled`     | `^11`                              |
+
+Drag and drop (`@hello-pangea/dnd`), date pickers (`@mui/x-date-pickers`) and `dayjs` are installed automatically.
+Styles are imported by the package itself; no CSS import is needed.
+
+## Quick start
+
+```tsx
+import { useState } from 'react'
 import {
-  IColumnConfig,
-  IColumnHeader,
-  IColumnConfigStructure,
-  IColumnHeaderStructure,
-  // ... other imports ...
-} from "beautiful-react-table";
+  StructureConfig,
+  Table,
+  type IColumnConfig,
+  type IColumnConfigStructure,
+  type IColumnHeader,
+  type IColumnHeaderStructure,
+} from 'beautiful-react-table'
 
-function App() {
-
-  const [data, setData] = useState<any[]>([
-    {
-      id: 1,
-      agentId: 1,
-      agentCreationDate: "2023-03-22T00:00:00",
-      agentName:"Markos",
-    },
-    {
-      id: 2,
-      agentId: 2,
-      agentCreationDate: "2023-03-22T00:00:00",
-      agentName: "Daniel",
-    },
-    {
-      id: 3,
-      agentId: 3,
-      agentCreationDate: "2023-03-22T00:00:00",
-      agentName: "Mary",
-    },
-  ]);
-
-  const [columnHeader] = useState<IColumnHeader[]>([
-    {
-      id: 1,
-      order: 1,
-      title: "Id",
-    },
-    {
-      id: 2,
-      order: 2,
-      title: "Name",
-    },
-    {
-      id: 3,
-      order: 3,
-      title: "Creation Date",
-    },
-  ]);
-
-  const [columnConfig] = useState<IColumnConfig<any>[]>([
-    {
-      id: 1,
-      title: (row: any, name: string) => (
-        <div>
-          <p>{row.title}</p>
-        </div>
-      ),
-      setRow: (row: any) => (
-        <div>
-          <div>{row.id}</div>
-        </div>
-      ),
-      isVisible: true,
-    },
-    {
-      id: 2,
-      title: (row: IColumnHeader, name: string) => (
-        <div>
-          <p>{row.title}</p>
-        </div>
-      ),
-      setRow: (row: any) => (
-        <div>
-          <div>{row.agentName}</div>
-        </div>
-      ),
-      isVisible: true,
-    },
-    {
-      id: 3,
-      title: (row: IColumnHeader, name: string) => (
-        <div>
-          <p >{row.title}</p>
-        </div>
-      ),
-      setRow: (row: any) => (
-        <div>
-          <div>{row.agentCreationDate}</div>
-        </div>
-      ),
-      isVisible: true,
-    },
-  ]);
-
- const [columnsConfigStructure, setColumnsConfigStructures] = useState<
-    IColumnConfigStructure<any>
-  >({
-    [StructureConfig.Main]: {
-      name: "Columns",
-      items: columnConfig,
-    },
-    [StructureConfig.Freezed]: {
-      name: "Freezed",
-      items: [],
-    },
-  });
-
-  const [columnsHeaderStructure, setColumnHeaderStructures] =
-    useState<IColumnHeaderStructure>({
-      [StructureConfig.Main]: {
-        name: "Columns",
-        items: columnHeader,
-      },
-      [StructureConfig.Freezed]: {
-        name: "Freezed",
-        items: [],
-      },
-    });
-
-  return (
-    <div style={{ width: "80%", margin: "0 auto" }}>
-      <Table
-        data={data} // TableData
-        columnsConfigStructure={columnsConfigStructure} // Structure to store in the database - pin/hide/drag-drop
-        columnsHeaderStructure={columnsHeaderStructure} // headerStructure will automatically work with configStructure
-        // ... other props ...
-      />
-    </div>
-  );
+interface Agent {
+  id: number // every row needs a unique id
+  name: string
+  createdAt: string
 }
 
-export default App;
+const rows: Agent[] = [
+  { id: 1, name: 'Markos', createdAt: '2023-03-22' },
+  { id: 2, name: 'Daniel', createdAt: '2023-03-22' },
+]
+
+// Headers and column configs are matched by position: headers[i] describes configs[i].
+const headers: IColumnHeader[] = [
+  { id: 1, order: 1, title: 'Name' },
+  { id: 2, order: 2, title: 'Created' },
+]
+
+const configs: IColumnConfig<Agent>[] = [
+  { id: 1, isVisible: true, title: (header) => header.title, setRow: (row) => <div style={{ width: 160 }}>{row?.name}</div> },
+  { id: 2, isVisible: true, title: (header) => header.title, setRow: (row) => <div style={{ width: 120 }}>{row?.createdAt}</div> },
+]
+
+export function Agents() {
+  const [config, setConfig] = useState<IColumnConfigStructure<Agent>>({
+    [StructureConfig.Main]: { name: 'Columns', items: configs },
+    [StructureConfig.Freezed]: { name: 'Pinned', items: [] },
+  })
+  const [header, setHeader] = useState<IColumnHeaderStructure>({
+    [StructureConfig.Main]: { name: 'Columns', items: headers },
+    [StructureConfig.Freezed]: { name: 'Pinned', items: [] },
+  })
+
+  return (
+    <Table<Agent>
+      data={rows}
+      columnsConfigStructure={config}
+      columnsHeaderStructure={header}
+      draggableColumns
+      setColumnsConfigStructure={setConfig}
+      setColumnHeaderStructure={setHeader}
+    />
+  )
+}
 ```
 
-# Table Structure
+**Column widths.** Cells size to their content, capped by `column.width` (or `columnMinWidth`). Render header and
+cell content at a fixed width, as in the example above, so that columns line up.
 
-We can drag, hide and dock columns vertically and horizontally.
-Add the "draggableColumns" details, then create the "setColumnsConfigStructure" and "setColumnHeaderStructure" functions.
+A complete example with filters, pagination, totals and row actions is in [`playground/src/App.tsx`](playground/src/App.tsx)
+(`npm run dev` to run it).
 
-```JSX
-  const setColumnsConfigStructure = (option: IColumnConfigStructure<any>) => {
-    setColumnsConfigStructures(option);
-  };
+## Columns
 
-  const setColumnHeaderStructure = (option: IColumnHeaderStructure) => {
-    setColumnHeaderStructures(option);
-  };
+```ts
+interface IColumnConfig<T> {
+  id?: string | number
+  title: (header: IColumnHeader, title: string, handleSorting?: (key: string) => void) => ReactNode
+  setRow: (row?: T, isLoading?: boolean) => ReactNode // cell content
+  footer?: (header, title, handleArgChange, aggregates, isLoading) => ReactNode // totals row
+  isVisible: boolean
+  width?: number // max cell width in px
+  customStyle?: CSSProperties
+  columnName?: string // label in "Customize columns" (defaults to the header title)
+}
 ```
 
-![customizing](https://github.com/PandaTechAM/web-lib-panda-table/assets/69170986/723a5a7d-e2cc-40a6-9930-1e62630f6ae8)
+The table keeps the current layout in `columnsConfigStructure` / `columnsHeaderStructure`: `Main` holds regular
+columns and `Freezed` holds pinned ones. Handle `setColumnsConfigStructure` and `setColumnHeaderStructure` to accept
+changes from the customization popup, and `storeStructure` to persist them (it runs when the user presses Save).
 
-And if we want to add some functionality to the save button, we need to use the "storeStructure" function.
+## Pagination
 
-```JSX
-const storeStructure = () => {};
+```tsx
+<Table
+  // ...
+  pageSizeStructure={[{ id: 1, count: 10 }, { id: 2, count: 25 }, { id: 3, count: 50 }]}
+  selectedPageSizeId={pageSize} // one of pageSizeStructure, matched by id
+  currentPage={page}
+  pagesTotalCount={totalRows} // total number of rows (not pages)
+  getPageRowsCountAndCurrentPage={(page, size) => load(page, size.count)}
+/>
 ```
 
-Let's add width to the column
+## Filters
 
-```JSX
-columnMinWidth={120}
+Filters follow the request model of the PandaTech filter backend, but nothing in the table calls a server:
+you receive callbacks and decide what to fetch.
+
+```tsx
+<Table
+  hasFilters
+  filtersTypes={filtersTypes} // operators per column type, e.g. { ColumnType: 'Text', FilterTypes: ['Equal', 'Contains'], ... }
+  filterColumns={columns} // [{ ColumnName: 'City', ColumnType: ColumnTypeEnums.Text, key: 'City', options: [...] }]
+  filterDataForRequest={appliedFilters} // currently applied filters
+  getFilteredData={(filters, columnName) => loadValues(columnName)} // put the result in filterColumns[i].options
+  getFilteredDataWithDebounce={(filters, columnName) => loadValuesDebounced(columnName)}
+  handleChangePagePerFilterField={(nextPage) => loadMoreValues(nextPage)}
+  perColumnTotalCount={lastPageSize}
+  getFilteredDataForTable={(filters) => applyFilters(filters)}
+/>
 ```
 
-![freezed_column](https://github.com/PandaTechAM/web-lib-panda-table/assets/69170986/970cd1bc-d752-461c-9147-46a155ce337b)
+Set `filterColumns[i].isLoading` while values for a column are loading.
 
-# Hovered Row Actions
+## Selection, row actions and downloads
 
-When we use isHoveredRow props, we need to make actions.
-We have default icons, but we can make custom.
+| Prop                                  | Description                                                                              |
+| ------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `multipleCheck`                       | Checkbox column and the "select visible / all / none" menu                               |
+| `handleEdit`, `handleDelete`          | Toolbar actions for the checked rows                                                     |
+| `customHeaderAction`, `staticAction`  | Custom toolbar elements                                                                  |
+| `isHoveredRow`, `rowActions`          | Up to three icon actions on hover (defaults: edit, delete)                               |
+| `rowsFreezeAction`, `FreezeIcon`      | "Freeze row" button on hover (up to three rows)                                          |
+| `freezedRightSideVisible`             | Sticky right column                                                                      |
+| `freezedRightSide='dropdown'`, `links` | Right column shows a menu; otherwise `RightSideSelfAction(row)` is called              |
+| `rightFreezeConfig`                   | Custom cells for the right column                                                        |
+| `getDownloadType`                     | Shows the Download menu; receives `'XLSX' \| 'CSV'` and the checked rows, or `'All'`     |
+| `getRow`                              | Row click                                                                                |
 
-```JSX
-const [rowActions] = useState<IrowActions[]>([
-    {
-      action: (e, item, index) => {
-        e.stopPropagation();
-      },
-    },
-    {
-      action: (e, item, index) => {
-        e.stopPropagation();
-      },
-    },
-  ]);
+Every prop is documented in the type definitions, so your editor shows the description on hover.
+
+## Translations
+
+All UI texts come from `translations`; any missing text falls back to English.
+
+```ts
+const translations = {
+  emptyData: 'No data',
+  checkbox: { all: 'Select all', allVisible: 'Select visible rows', none: 'None' },
+  customizationAction: { modalName: 'Customize columns', info: '...', actionButtonName: 'Save', validationMessage: '...' },
+  deleteAction: 'Delete',
+  editAction: 'Edit',
+  filterAction: {
+    modalName: 'Filters', advanced: 'Advanced', confirmFilters: 'Apply', clearFilters: 'Clear all',
+    clearDate: 'Clear', todayButton: 'Today', hour: 'Hour', min: 'Min', sec: 'Sec', loadMore: 'Load more',
+    emptyFieldData: 'No values', blank: '(Blank)', emptyString: '(Empty)', from: 'From', to: 'To',
+    validations: { isEmpty: 'Required', onlyNumbers: 'Numbers only', err: 'Invalid range', invalid: 'Invalid date' },
+    emptyColumns: 'No columns',
+  },
+  dowloadAction: 'Download',
+  pagination: { from: 'of', show: 'Show', rows: 'rows', to: 'Go to' },
+}
 ```
 
-# Page Size Config
+## Styling
 
-```JSX
-const [pageSize] = useState<IPageSizes[]>([
-    { id: 1, count: 10 },
-    { id: 2, count: 25 },
-    { id: 3, count: 50 },
-    { id: 4, count: 100 },
-  ]);
+- Styles are scoped to the table (`.brt-root`) and its popups; importing the library does not restyle your app.
+- The `G-` flex helpers (`G-flex`, `G-center`, `G-align-center`, `G-justify-between`, ...) are global and can be used
+  in your own markup.
+- Colors and sizes: `headerColor`, `footerColor`, `freezedLeftSideColor`, `freezedRightSideColor`, `headerHeight`,
+  `footerHeight`, `columnMinWidth`, `leftFreezedColumnWidth`, `rightFreezedColumnWidth`.
+
+## Upgrading from v7
+
+See [CHANGELOG.md](CHANGELOG.md#migrating-from-7x). In short: update peer dependencies, replace `react-beautiful-dnd`
+if you only installed it for this table, and import `beautiful-react-table/legacy-global.css` if your app relied on
+the page-wide CSS reset that v7 applied.
+
+## Development
+
+```bash
+npm install
+npm run dev        # playground at http://localhost:5180, running against src/
+npm test           # unit tests (Vitest)
+npm run lint
+npm run typecheck
+npm run build      # dist/: ESM, CJS, bundled .d.ts and CSS
 ```
 
-# Dropdown Menu Config
+## License
 
-When we use
-
-```JSX
-freezedRightSide={"dropdown"}
-```
-
-, we have to make config for list.
-
-```JSX
-const [links] = useState<ILinksList[]>([
-    {
-      id: 1,
-      name: "Overpayments",
-      action: (option: any) => {},
-    },
-    {
-      id: 2,
-      name: "Estate Owners",
-      action: (option: any) => {},
-    },
-  ]);
-```
-
-# Right Freezed Column Config
-
-We can create costume freezed columns in right side.
-
-```JSX
-const [rightFreezeConfig] = useState<IColumnConfig<any>[]>([
-    {
-      id: 1,
-      title: (row: IColumnHeader, name: string) => (
-        <div>
-          <p>{row.title}</p>
-        </div>
-      ),
-      setRow: () => (
-        <div>
-          <p>View Details</p>
-        </div>
-      ),
-      isVisible: true,
-    },
-    {
-      id: 2,
-      title: (row: IColumnHeader, name: string) => (
-        <div>
-          <p>{row.title}</p>
-        </div>
-      ),
-      setRow: () => (
-        <div>
-          <p>View Details</p>
-        </div>
-      ),
-      isVisible: true,
-    },
-  ]);
-```
-
-# Aggregates
-
-List for filtering aggregates
-Works with PandaTech.IEnumerableFilters nuget
-
-```JSX
-const [listForDropdown] = useState<ITotalList[]>([
-    {
-      id: 1,
-      title: "AVG",
-    },
-    {
-      id: 2,
-      title: "MIN",
-    },
-    {
-      id: 3,
-      title: "MAX",
-    },
-    {
-      id: 4,
-      title: "SUM",
-    },
-  ]);
-```
-
-# Filters
-
-Filters works with PandaTech.IEnumerableFilters nuget
-
-```JSX
-  const [selectedColumnName, setSelectedColumnName] = useState<string>("");
-  const [pagePerFilterField, setPagePerFilterField] = useState<number>(1);
-  const [perColumnTotalCount, setPerColumnTotalCount] = useState<number>(0);
-  const [filterDataForRequest, setFilterDataForRequest] = useState<ItemFields[]>([]);
-  const [totalPagesCount, setTotalPagesCount] = useState<number>(0);
-  const [isLoadingFilters, setIsLoading] = useState<boolean>(false);
-  const [perColumnListForFilters, setPerColumnListForFilters] = useState<string[]>();
-```
-
-# Functions
-
-```JSX
-const setColumnsConfigStructure = (option: IColumnConfigStructure<any>) => {
-    setColumnsConfigStructures(option);
-  };
-  const setColumnHeaderStructure = (option: IColumnHeaderStructure) => {
-    setColumnHeaderStructures(option);
-  };
-  const handleEdit = (option: any) => {};
-  const handleDelete = (option: any[] | string) => {};
-  const RightSideSelfAction = (option: number | string) => {};
-  const storeStructure = () => {};
-  const getRow = (row: any) => {};
-  const getPageRowsCountAndCurrentPage = (pageNumber: number, rowsCount: IPageSizes) => {};
-  const handleChangePagePerFilterField = () => {};
-  const getFilteredDataForTable = (option?: ItemFields[]) => {};
-  const getDownloadType = (option: string, checkedRows: any[] | string) => {};
-  const customHeaderAction = (option: any[] | string) => ReactNode;
-```
-
-# Props
-
-The "Table" component accepts the following props:
-
-```TS
-data (required): An array of objects representing the table data.
-columnsConfigStructure (required): An object representing the column configuration structure.
-columnsHeaderStructure (required): An object representing the column header structure.
-allDataFromDb (optional): An array of objects representing the complete data set from the database.
-columnsTotalStructure (optional): An object representing the column total structure.
-pageSize (optional): An array of page sizes for pagination.
-links (optional): An array of link items for navigation.
-listForDropdown (optional): An array for choosing footer items type.
-rowActions (optional): An array of row actions for each table row.
-selectedPage (optional): An object representing the currently selected page.
-currentPage (optional): The current page number.
-totalCount (optional): The total number of items in the table.
-multipleCheck (optional): Boolean flag to enable multiple row selection.
-isStickyFirstColumn (optional): Boolean flag to enable sticking the first column.
-isHoveredRow (optional): Boolean flag to enable highlighting the hovered row.
-draggableColumns (optional): Boolean flag to enable column reordering.
-freezedRightSideVisible (optional): is dropdown.
-FreezeIcon (optional): The icon to display for freezing columns.
-headerColor (optional): The color of the table header.
-footerColor (optional): The color of the table footer.
-freezedLeftSideColor (optional): The color of the left side of the table when frozen.
-freezedRightSideColor (optional): The color of the right side of the table when frozen.
-freezedRightSide (optional): The right side content of the frozen table.
-columnMinWidth (optional): The minimum width of each column.
-headerHeight (optional): The height of the table header.
-footerHeight (optional): The height of the table footer.
-leftFreezedColumnWidth (optional): The width of the left side column when frozen.
-rightFreezedColumnWidth (optional): The width of the right side column when frozen.
-leftSideIcon (optional): The icon to display for the left side of the table.
-RightSideSelfAction (optional): A function to handle the self-action on the right side of the table.
-setColumnTotalStructures (optional): A function to set the column total structures.
-handleEdit (optional): A function to handle the edit action for a table row.
-handleDelete (optional): A function to handle the delete action for multiple table rows.
-setColumnsConfigStructure (optional): A function to set the column configuration structure.
-setColumnHeaderStructure (optional): A function to set the column header structure.
-handleSelectDataSize (optional): A function to handle the selection of data size for pagination.
-```
+MIT © Samvel Baghdasaryan

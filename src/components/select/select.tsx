@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import './style.scss'
+import { useLayoutEffect, useRef, useState, type ElementType, type KeyboardEvent, type MouseEvent } from 'react'
 import ClickOutside from '../click-outside'
-import DropdownSvgIcon from '../../svgIcons/DropdownSvgIcon'
 import LinkSvgIcon from '../../svgIcons/LinkSvgIcon'
-/**
- * Main  props  for select component
- * T is  the main type for  component
- * **/
-interface IObjectKey {
-  [key: string]: any
-}
+import './style.scss'
 
-interface ISelect<T> {
-  optionsList: Array<T>
+type Option = Record<string, any>
+
+interface ISelect<T extends Option> {
+  optionsList: T[]
   value: string | number | null
+  /** Option field shown as the label. */
   selectedNameKey: string
+  /** Option field compared with `value`. */
   selectedValueKey: string
   customClass?: string
   placeholder?: string
@@ -26,14 +22,18 @@ interface ISelect<T> {
   isOpenList?: boolean
   setIsOpenList?(): void
   onChange?(value: T | null): void
-  ListItemSvg?: any
+  ListItemSvg?: ElementType
   haveIcon?: boolean
-  ButtonSvg?: any
-  rowItem?: any
-  typesObject?: any
+  ButtonSvg?: ElementType
+  /** Passed to an option's `action(rowItem)` when it is chosen (used by row link menus). */
+  rowItem?: unknown
+  typesObject?: Record<string, T>
 }
 
-function Select<T>({
+const LIST_HEIGHT = 320
+
+/** Lightweight dropdown used for the page-size picker, downloads and row actions. */
+function Select<T extends Option>({
   optionsList,
   selectedNameKey,
   selectedValueKey,
@@ -54,200 +54,126 @@ function Select<T>({
   customClass = '',
   isImage = false,
 }: ISelect<T>) {
-  const [selectedValue, setValue] = useState<T | null>(null)
-  const [selectedValueName, setSelectedValueName] = useState<string | null>(null)
-  const [listPosition, setListPosition] = useState<'bottom' | 'top'>('top')
-  const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
-  // const [isOpenList, setIsOpenList] = useState<boolean>(false);
+  const rootRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  const [opensUpward, setOpensUpward] = useState(true)
 
-  /**
-   * get value object from options list with
-   * @selectedValueKey from props
-   * **/
-  useEffect(() => {
-    if (value || value === 0) {
-      optionsList?.map((item: T) => {
-        Object.entries(item as IObjectKey).forEach(([key, keyValue]) => {
-          if (keyValue === value && key === selectedValueKey) {
-            setValue(item)
-          }
-        })
-      })
-    } else {
-      setValue(null)
-    }
-  }, [value, optionsList, selectedValueKey])
+  const options = typesObject ? optionsList.map((key) => typesObject[key as unknown as string]) : optionsList
+  const hasValue = value !== null && value !== undefined && value !== ''
+  const selected = hasValue ? options.find((option) => option?.[selectedValueKey] === value) : undefined
+  const selectedName = selected?.[selectedNameKey] ?? null
+  const selectedIcon = selectedIconKey ? selected?.[selectedIconKey] : undefined
 
-  /**
-   *  selected data name from
-   *  @selectedValue
-   *  @selectedNameKey  from props
-   * **/
-
-  useEffect(() => {
-    if (selectedValue) {
-      Object.entries(selectedValue as IObjectKey).forEach(([key, value]) => {
-        if (key === selectedNameKey) {
-          setSelectedValueName(value)
-        }
-        if (key === selectedIconKey) {
-          setSelectedIcon(value)
-        }
-      })
-    } else {
-      setSelectedValueName(null)
-    }
-  }, [selectedValue, selectedIconKey, selectedNameKey])
-
-  function getItemName(item: T) {
-    let name = ''
-    let isSelected = false
-    let icon = ''
-    Object.entries(item as IObjectKey).forEach(([key, itemValue]) => {
-      if (key === selectedNameKey) {
-        name = itemValue
-      }
-      if (key === selectedValueKey && value === itemValue) {
-        isSelected = true
-      }
-      if (key === selectedIconKey) {
-        icon = itemValue
-      }
-    })
-    return {
-      name,
-      isSelected,
-      icon,
-    }
-  }
-  useEffect(() => {
-    const dropdownListElement = document.querySelector('.G-select-list')
-    if (dropdownListElement) {
-      const { top, bottom } = dropdownListElement.getBoundingClientRect()
-      const windowHeight = window.innerHeight
-      if (bottom > 320 && top > 320 / 2) {
-        setListPosition('top')
-      } else {
-        setListPosition('bottom')
-      }
-    }
+  // Open upward when there is room above; measure this select's own list (v7 measured the first list on the page).
+  useLayoutEffect(() => {
+    if (!isOpenList || !listRef.current) return
+    const { top, bottom } = listRef.current.getBoundingClientRect()
+    setOpensUpward(bottom > LIST_HEIGHT && top > LIST_HEIGHT / 2)
   }, [isOpenList])
-  /**
-   * Select  list item props
-   * @item  T
-   * @index of list
-   * **/
-  function selectListItem(item: T, index: number) {
-    return (
-      <li
-        onClick={(e) => {
-          e.stopPropagation()
-          changeData(item)
-          //@ts-ignore
-          item.action?.(rowItem)
-        }}
-        key={index}
-        className={`G-flex G-align-center ${getItemName(item).isSelected ? 'G-selected-item' : ''}`}
-      >
-        {selectedIconKey && isImage && (
-          <span
-            className='G-select-image'
-            style={{
-              backgroundImage: `url('${getItemName(item).icon}')`,
-            }}
-          />
-        )}
-        {selectedIconKey && !isImage && <span className={`G-select-status ${getItemName(item).icon}`} />}
-        {haveIcon ? (
-          !ListItemSvg ? (
-            <div
-              style={{
-                marginRight: '10px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <LinkSvgIcon fill={'#4844C5'} />
-            </div>
-          ) : (
-            <div>
-              <ListItemSvg fill={'#4844C5'} />
-            </div>
-          )
-        ) : null}
-        <p>{getItemName(item).name}</p>
-      </li>
-    )
-  }
 
-  /**
-   * Change data, select an data from  list
-   * @data T type object
-   * has props
-   * @onChange
-   * **/
-
-  function changeData(data: T | null) {
-    onChange && onChange(data)
+  const choose = (option: T) => {
+    onChange?.(option)
+    option.action?.(rowItem)
     setIsOpenList?.()
   }
 
-  /**
-   * Delete selected data
-   * has props
-   * @onChange
-   * **/
-  function resetData(e: React.MouseEvent<HTMLDivElement>) {
-    e.stopPropagation()
-    onChange && onChange(null)
+  const toggle = (event: MouseEvent | KeyboardEvent) => {
+    event.stopPropagation()
+    setIsOpenList?.()
   }
 
-  const handleChange = (e: any) => {
-    e.stopPropagation()
-    setIsOpenList?.()
+  const onKeyActivate = (handler: (event: KeyboardEvent) => void) => (event: KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handler(event)
+    }
   }
-  const handleClose = (e: MouseEvent) => {
-    setIsOpenList?.()
-    e.stopPropagation()
+
+  const clear = (event: MouseEvent) => {
+    event.stopPropagation()
+    onChange?.(null)
   }
+
+  const Arrow = ButtonSvg
   return (
-    <div className={`G-select ${customClass}`}>
-      <div className={`G-select-header ${selectedIconKey ? 'G-with-icon' : ''}`} onClick={(e) => handleChange(e)}>
-        {selectedIconKey && selectedValueName && isImage && (
-          <span className={`G-select-image`} style={{ backgroundImage: `url('${selectedIcon}')` }} />
+    <div ref={rootRef} className={`G-select ${customClass}`}>
+      <div
+        role='button'
+        tabIndex={0}
+        aria-haspopup='listbox'
+        aria-expanded={Boolean(isOpenList)}
+        className={`G-select-header ${selectedIconKey ? 'G-with-icon' : ''}`}
+        onClick={toggle}
+        onKeyDown={onKeyActivate(toggle)}
+      >
+        {selectedIconKey && selectedName && isImage && (
+          <span className='G-select-image' style={{ backgroundImage: `url('${selectedIcon}')` }} />
         )}
-        {selectedIconKey && selectedValueName && !isImage && <span className={`G-select-status ${selectedIcon}`} />}
+        {selectedIconKey && selectedName && !isImage && <span className={`G-select-status ${selectedIcon}`} />}
         {label && <span className='G-select-label'>{label}</span>}
-        <p className={`${!selectedValueName ? 'G-opacity-placeholder' : ''}`}>
-          {selectedValueName ? selectedValueName : placeholder}
-        </p>
-        {(!selectedValueName || (selectedValueName && !isClear)) && (
+        <p className={selectedName ? '' : 'G-opacity-placeholder'}>{selectedName ?? placeholder}</p>
+        {(!selectedName || !isClear) && (
           <div className='G-center'>
-            {!ButtonSvg ? (
-              <LinkSvgIcon fill={!isOpenList ? 'black' : '#4844C5'} />
+            {Arrow ? (
+              <Arrow fill={isOpenList ? '#4844C5' : '#ACBCC3'} />
             ) : (
-              <ButtonSvg fill={!isOpenList ? '#ACBCC3' : '#4844C5'} />
+              <LinkSvgIcon fill={isOpenList ? '#4844C5' : 'black'} />
             )}
           </div>
         )}
-        {isClear && selectedValueName && (
-          <i onClick={resetData} className={`G-select-icon icon-close G-cursor-pointer`} />
-        )}
+        {isClear && selectedName && <i onClick={clear} className='G-select-icon icon-close G-cursor-pointer' />}
       </div>
       {isOpenList && (
-        <ClickOutside onClickOutside={(e: MouseEvent) => handleClose(e)}>
+        <ClickOutside
+          onClickOutside={(event) => {
+            // Clicks on this select's header toggle the list themselves; handling them here would toggle twice.
+            if (!rootRef.current?.contains(event.target as Node)) setIsOpenList?.()
+          }}
+        >
           <div
-            className={`G-select-list ${listPosition === 'top' ? 'G-select-list-top' : ''}`}
-            style={{
-              maxHeight: maxHeight + 'px',
-            }}
+            ref={listRef}
+            className={`G-select-list ${opensUpward ? 'G-select-list-top' : ''}`}
+            style={{ maxHeight: `${maxHeight}px` }}
           >
-            <ul>
-              {optionsList.map((item, index) => {
-                if (typesObject) {
-                  return selectListItem(typesObject[item], index)
-                }
-                return selectListItem(item, index)
+            <ul role='listbox'>
+              {options.map((option, index) => {
+                const isSelected = hasValue && option?.[selectedValueKey] === value
+                const icon = selectedIconKey ? option?.[selectedIconKey] : undefined
+                const ItemIcon = ListItemSvg
+                return (
+                  <li
+                    key={index}
+                    role='option'
+                    aria-selected={isSelected}
+                    tabIndex={0}
+                    className={`G-flex G-align-center ${isSelected ? 'G-selected-item' : ''}`}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      choose(option)
+                    }}
+                    onKeyDown={onKeyActivate((event) => {
+                      event.stopPropagation()
+                      choose(option)
+                    })}
+                  >
+                    {selectedIconKey && isImage && (
+                      <span className='G-select-image' style={{ backgroundImage: `url('${icon}')` }} />
+                    )}
+                    {selectedIconKey && !isImage && <span className={`G-select-status ${icon}`} />}
+                    {haveIcon ? (
+                      ItemIcon ? (
+                        <div>
+                          <ItemIcon fill='#4844C5' />
+                        </div>
+                      ) : (
+                        <div style={{ marginRight: 10, display: 'flex', alignItems: 'center' }}>
+                          <LinkSvgIcon fill='#4844C5' />
+                        </div>
+                      )
+                    ) : null}
+                    <p>{option?.[selectedNameKey]}</p>
+                  </li>
+                )
               })}
             </ul>
           </div>

@@ -1,7 +1,6 @@
 import { Button, Menu, ThemeProvider } from '@mui/material'
-import React, { ReactElement } from 'react'
+import { useId, type MouseEvent, type ReactElement } from 'react'
 import './style.scss'
-import { hover } from '@testing-library/user-event/dist/hover'
 import { theme } from '../../utils/muiTheme'
 interface IPopUp {
   children: ReactElement
@@ -13,11 +12,11 @@ interface IPopUp {
   item?: any
   open: boolean
   anchorEl: any
-  handleClose: (e: React.MouseEvent<HTMLButtonElement>) => void
-  handleClick: (event: React.MouseEvent<HTMLButtonElement>) => void
+  handleClose: (e: MouseEvent<HTMLButtonElement>) => void
+  handleClick: (event: MouseEvent<HTMLButtonElement>) => void
   getRowForDropdown?: (option: any) => void
 }
-const PopUp = <T extends Object>({
+const PopUp = ({
   children,
   ActiveIcon,
   DisabledIcon,
@@ -31,12 +30,16 @@ const PopUp = <T extends Object>({
   handleClick,
   getRowForDropdown,
 }: IPopUp) => {
+  // Unique per instance: every row renders a popup, so fixed ids were duplicated across the page.
+  const id = useId()
+  const buttonId = `brt-popup-button-${id}`
+  const menuId = `brt-popup-menu-${id}`
   return (
     <>
       <ThemeProvider theme={theme}>
         <Button
-          id='basic-button'
-          aria-controls={open ? 'basic-menu' : undefined}
+          id={buttonId}
+          aria-controls={open ? menuId : undefined}
           aria-haspopup='true'
           aria-expanded={open ? 'true' : undefined}
           onClick={handleClick}
@@ -54,7 +57,7 @@ const PopUp = <T extends Object>({
         >
           <div
             className='G-center'
-            onClick={(e) => {
+            onClick={() => {
               getRowForDropdown?.(item?.id)
             }}
           >
@@ -87,13 +90,15 @@ const PopUp = <T extends Object>({
         </Button>
       </ThemeProvider>
       <Menu
-        id='basic-menu'
+        id={menuId}
+        className='brt-root brt-popup-menu'
+        sx={{ '& .MuiMenu-list': { padding: 0 } }}
         anchorEl={anchorEl}
         open={checkedLink && item ? (checkedLink.id === item.id ? open : false) : open}
         elevation={0}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': 'basic-button',
+          'aria-labelledby': buttonId,
         }}
       >
         {children}

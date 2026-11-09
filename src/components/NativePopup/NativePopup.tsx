@@ -1,12 +1,17 @@
-// Modal.tsx
-
-import React, { ReactNode, useEffect, useState } from 'react'
-import './style.scss'
-// import ClickOutside from "../click-outside";
+import {
+  useState,
+  type KeyboardEvent,
+  type MemoExoticComponent,
+  type ReactElement,
+  type ReactNode,
+  type SVGProps,
+} from 'react'
 import ClickOutside from '../click-outside'
+import { useSyncOnChange } from '../../utils/useSyncOnChange'
+import './style.scss'
 
 interface IModalProps {
-  ActiveIcon: React.MemoExoticComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
+  ActiveIcon: MemoExoticComponent<(props: SVGProps<SVGSVGElement>) => ReactElement>
   children: ReactNode
   isOpen: boolean
   popupName: string
@@ -14,47 +19,45 @@ interface IModalProps {
   handleClose: () => void
 }
 
-interface MyComponentProps {
-  handleCancel: () => void
-  getFilteredDataForTable?: () => void
-  handleClick?: () => void
-}
-
+/** Panel anchored under its trigger button, with fade-in / fade-out (used by the filters panel). */
 const NativePopup = ({ ActiveIcon, isOpen, children, popupName, handleOpen, handleClose }: IModalProps) => {
-  const [animated, setAnimated] = useState(false)
+  // Stays true until the fade-out animation ends, so the panel can animate out after `isOpen` turns false.
+  const [isMounted, setIsMounted] = useState(false)
+  useSyncOnChange(isOpen, (open) => {
+    if (open) setIsMounted(true)
+  })
 
-  const isAnimated = () => {
-    if (isOpen && animated) {
-      return 'fade-in'
-    }
-    if (isOpen && !animated) {
-      return ''
-    }
-    if (!isOpen && animated) {
-      return 'fade-out'
+  const animationClass = isOpen ? (isMounted ? 'fade-in' : '') : isMounted ? 'fade-out' : ''
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleOpen()
     }
   }
 
-  useEffect(() => {
-    if (isOpen) setAnimated(true)
-  }, [isOpen])
-
   return (
     <div className='G-wrapper-button'>
-      <div role='button' aria-label='open' onClick={handleOpen} className='G-center G-popup-button'>
+      <div
+        role='button'
+        tabIndex={0}
+        aria-expanded={isOpen}
+        aria-label={popupName}
+        onClick={handleOpen}
+        onKeyDown={handleKeyDown}
+        className='G-center G-popup-button'
+      >
         <ActiveIcon className='G-icon' />
         <label className='G-label'>{popupName}</label>
       </div>
-      {isOpen || animated ? (
+      {isOpen || isMounted ? (
         <ClickOutside onClickOutside={handleClose}>
-          <div className='popup-overlay '>
+          <div className='popup-overlay'>
             <div
-              onAnimationEnd={(e) => {
-                if (e.animationName === 'fadeOut') {
-                  setAnimated(false)
-                }
+              onAnimationEnd={(event) => {
+                if (event.animationName === 'fadeOut') setIsMounted(false)
               }}
-              className={`popup-content ${isAnimated()}`}
+              className={`popup-content ${animationClass}`}
             >
               {children}
             </div>

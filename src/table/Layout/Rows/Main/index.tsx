@@ -1,13 +1,21 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react'
-import { IColumnConfig, IColumnConfigStructure, ILinksList, IrowActions } from '../../../../Models/table.models'
+import type { TableIcon } from '../../../../Models/table.models'
+import { type RowId } from '../../../../utils/rowId'
 import { forwardRef } from 'react'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
+import {
+  type IColumnConfig,
+  type IColumnConfigStructure,
+  type ILinksList,
+  type IrowActions,
+} from '../../../../Models/table.models'
+
 import FreezedRightColumns from '../FreezedRigthColumns'
 import Checkbox from '../../../../components/checkbox'
 import FreezedLeftColumns from '../FreezedLeftColumns'
 import { CheckedItems, StructureConfig } from '../../../../Models/table.enum'
 import HoveredRow from '../HoveredRow'
 import { hasScroll } from '../../../../utils'
-interface IMainRows<T extends Object> {
+interface IMainRows<T extends object> {
   unFreezedRows: T[]
   freezedRows: T[]
   rightFreezeConfig?: IColumnConfig<T>[]
@@ -15,7 +23,7 @@ interface IMainRows<T extends Object> {
   multipleCheck?: boolean
   columnMinWidth?: number
   rowActions?: IrowActions[]
-  FreezeIcon?: React.MemoExoticComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
+  FreezeIcon?: TableIcon
   isStickyFirstColumn?: boolean
   tableWidth?: number
   links?: ILinksList[]
@@ -25,7 +33,7 @@ interface IMainRows<T extends Object> {
   freezedRightSideColor?: string
   freezedRightSide?: string
   freezedRightSideVisible?: boolean
-  RightSideIcon?: React.MemoExoticComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
+  RightSideIcon?: TableIcon
   leftFreezedColumnWidth?: number
   rightFreezedColumnWidth?: number
   rowsFreezeAction?: boolean
@@ -35,9 +43,9 @@ interface IMainRows<T extends Object> {
   getRow?(options: any): void
   RightSideSelfAction?: (option: number | string) => void
   freezeRow(e: any, option: number): void
-  getRowForDropdown(option: number): void
-  isCheckedRows(option: number): boolean
-  handleCheck(option: number): void
+  getRowForDropdown(id: RowId): void
+  isCheckedRows(id: RowId): boolean
+  handleCheck(id: RowId): void
 }
 const MainRows = forwardRef<any, IMainRows<any>>(
   (
@@ -63,7 +71,6 @@ const MainRows = forwardRef<any, IMainRows<any>>(
       rightFreezedColumnWidth,
       rowsFreezeAction,
       selectedType,
-      hasOrdering,
       isLoadedData,
       getRow,
       RightSideSelfAction,

@@ -1,0 +1,110 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  color: #1f2937;
+}
+
+.page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.page__header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+}
+
+.page__header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.toggle {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.header-button {
+  all: unset;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: left;
+}
+
+.header-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.status {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.status--paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status--refunded {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.empty {
+  padding: 48px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.log {
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+.log h2 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+.log ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+.cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}

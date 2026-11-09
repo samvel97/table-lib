@@ -1,7 +1,4 @@
-@import "src/assets/style/variables";
-// @import "src/assets/style/mixin";
-// @import "src/assets/style/font";
-
+@use '../../assets/style/variables' as *;
 
 .G-select {
   position: relative;
@@ -41,7 +38,7 @@
 
   .G-select-icon {
     font-size: 14px;
-    margin-top:2px;
+    margin-top: 2px;
   }
 }
 
@@ -55,8 +52,6 @@
 
   ul {
     background-color: white;
-    ;
-
     li {
       padding: 10px 15px;
       cursor: pointer;
@@ -100,7 +95,6 @@
   text-overflow: ellipsis;
   padding: 0 5px;
   // max-width: calc(100% - 20px);
-
 }
 
 .G-select-status {

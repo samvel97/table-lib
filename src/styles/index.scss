@@ -1,0 +1,19 @@
+@use 'sass:meta';
+
+// Public, global flex helpers (`G-flex`, `G-center`, ...): unchanged from v7, apps rely on them.
+@include meta.load-css('utilities');
+
+// Element reset, focus ring, scrollbar and table-only helpers apply inside the table (`.brt-root`)
+// and its popups, which carry the same class. v7 applied the reset to the whole page.
+// :where() adds no specificity, so the reset stays as weak as v7's global one and component styles still win.
+:where(.brt-root) {
+  @include meta.load-css('base');
+
+  .G-shadow {
+    box-shadow: 2px 3px 4px 0 #ebe7e7;
+  }
+
+  .G-shadow-around {
+    box-shadow: 2px 0 18px 2px rgba(204, 200, 200, 0.56);
+  }
+}

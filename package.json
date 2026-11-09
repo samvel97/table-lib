@@ -1,96 +1,103 @@
 {
   "name": "beautiful-react-table",
-  "version": "7.8.2",
-  "description": "My first react typescript package",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types.d.ts",
-  "files": [
-    "dist/"
-  ],
-  "scripts": {
-    "clean": "rm -rf dist",
-    "build": "npm run clean && rollup -c",
-    "lint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\"",
-    "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\"",
-    "prepublishOnly": "npm run prettier && npm run lint"
-  },
+  "version": "8.0.0",
+  "description": "Feature-rich React data table: column customization with drag & drop, frozen rows and columns, server-side filters, aggregates, row actions and pagination.",
   "keywords": [
-    "table",
     "react",
+    "table",
+    "data-table",
+    "datagrid",
     "typescript",
-    "awesome-project",
-    "react-beautiful-table",
-    "beautiful-react-table",
-    "react-table",
-    "dnd-table"
+    "drag-and-drop",
+    "filters",
+    "pagination",
+    "mui"
   ],
-  "author": "Samvel Baghdasaryan (samvel97)",
+  "author": "Samvel Baghdasaryan (https://github.com/samvel97)",
   "license": "MIT",
+  "homepage": "https://pandatecham.github.io/web-lib-panda-table/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PandaTechAM/table-package.git"
+    "url": "git+https://github.com/PandaTechAM/web-lib-panda-table.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PandaTechAM/web-lib-panda-table/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/index.css",
+    "./legacy-global.css": "./dist/legacy-global.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite --config playground/vite.config.ts",
+    "build": "npm run typecheck && vite build && node scripts/copy-legacy-css.mjs",
+    "build:playground": "vite build --config playground/vite.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepublishOnly": "npm run lint && npm test && npm run build"
   },
   "peerDependencies": {
-    "@emotion/react": "^11.10.6",
-    "@emotion/styled": "^11.10.6",
-    "@mui/material": "^5.12.2",
-    "react": ">=16",
-    "react-beautiful-dnd": "13.1.1",
-    "react-dom": ">=16"
-  },
-  "devDependencies": {
-    "@emotion/react": "^11.10.6",
-    "@emotion/styled": "^11.10.6",
-    "@mui/material": "^5.12.2",
-    "@rollup/plugin-babel": "^6.0.3",
-    "@rollup/plugin-commonjs": "^25.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.2",
-    "@rollup/plugin-typescript": "^11.1.1",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/lodash": "^4.14.194",
-    "@types/node": "^16.18.25",
-    "@types/react": "^18.2.6",
-    "@types/react-beautiful-dnd": "^13.1.4",
-    "@types/react-dom": "^18.2.1",
-    "eslint": "^8.40.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "postcss": "^8.4.23",
-    "prettier": "^2.8.8",
-    "react": "^18.2.0",
-    "react-beautiful-dnd": "^13.1.1",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "rollup": "^2.79.1",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-postcss-modules": "^2.1.1",
-    "rollup-plugin-svg": "^2.0.0",
-    "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.34.1",
-    "sass": "^1.62.1",
-    "typescript": "^4.9.5"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.15.14 || ^6.0.0 || ^7.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
-    "@mui/x-date-pickers": "^6.9.0",
-    "beautiful-react-table": "^1.1.0",
-    "dayjs": "^1.11.8",
-    "rollup-plugin-dts": "^5.3.0",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-url": "^3.0.1",
-    "sass-loader": "^13.2.2",
-    "ts-loader": "^9.4.2",
-    "tslib": "^2.5.0"
+    "@hello-pangea/dnd": "^18.0.1",
+    "@mui/x-date-pickers": "^8.29.5",
+    "dayjs": "^1.11.23"
+  },
+  "devDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@eslint/js": "^10.0.1",
+    "@microsoft/api-extractor": "^7.60.1",
+    "@mui/material": "^7.3.11",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "globals": "^16.5.0",
+    "jsdom": "^27.4.0",
+    "prettier": "^3.9.10",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sass": "^1.107.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.6",
+    "vite-plugin-dts": "^5.1.2",
+    "vite-plugin-lib-inject-css": "^2.2.2",
+    "vitest": "^5.1.0"
   }
 }

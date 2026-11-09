@@ -1,6 +1,5 @@
 import React, { memo } from 'react'
-import { IProps } from '../Models/table.models'
-import '../assets/style/index.scss'
+import { type IProps } from '../Models/table.models'
 import Footer from './Layout/Footer'
 import Header from './Layout/Header'
 import Rows from './Layout/Rows'
@@ -9,7 +8,7 @@ import MainHeader from './MainHeader'
 import './index.scss'
 import useTable from './useTable'
 import { hasScroll } from '../utils'
-function Table<T extends Object>({
+function Table<T extends object>({
   data = [],
   pageSizeStructure,
   pagesTotalCount,
@@ -37,9 +36,7 @@ function Table<T extends Object>({
   leftFreezedColumnWidth,
   rightFreezedColumnWidth,
   headerHeight,
-  perColumnListForFilters,
   filterDataForRequest,
-  isLoadingFilters,
   filterColumns,
   filtersTypes,
   rowsFreezeAction,
@@ -91,7 +88,7 @@ function Table<T extends Object>({
   } = useTable(data, freezedRightSide, RightSideSelfAction)
 
   return (
-    <div id='table-wrapper'>
+    <div id='table-wrapper' className='brt-root'>
       {!isLoadedData && !data.length ? <div className='empty-container'>{EmptyDataContainer}</div> : null}
       {multipleCheck || draggableColumns || hasFilters || getDownloadType ? (
         <MainHeader
@@ -238,4 +235,5 @@ function Table<T extends Object>({
   )
 }
 
-export default memo(Table)
+// memo() erases generics; the cast keeps <Table<Row>> typed for consumers.
+export default memo(Table) as typeof Table

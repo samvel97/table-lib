@@ -1,28 +1,28 @@
-.G-check-all-component{
-    max-width: 60p;
-    min-width: 60px;
-    display: flex;
-    justify-content: center;
+.G-check-all-component {
+  max-width: 60p;
+  min-width: 60px;
+  display: flex;
+  justify-content: center;
 }
-.G-dropdown-list{
-    padding: 24px;
-    min-height: 150px;
-    border-radius: 4px;
-    border: 1px solid var(--color-light-100, #ECECEC);
-    background: #FFF;
-    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.04);
-    li{
-        width: 100%;
-        min-width: 240px;
-        padding: 8px 0;
-        border-bottom: 1px solid #CED8DD;
-        cursor: pointer;
-        &:first-child{
-            padding:0 0  12px 0;
-        }
-        &:last-child{
-            padding: 12px 0 0 0;
-            border:none
-        }
+.G-dropdown-list {
+  padding: 24px;
+  min-height: 150px;
+  border-radius: 4px;
+  border: 1px solid var(--color-light-100, #ececec);
+  background: #fff;
+  box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.04);
+  li {
+    width: 100%;
+    min-width: 240px;
+    padding: 8px 0;
+    border-bottom: 1px solid #ced8dd;
+    cursor: pointer;
+    &:first-child {
+      padding: 0 0 12px 0;
     }
+    &:last-child {
+      padding: 12px 0 0 0;
+      border: none;
+    }
+  }
 }

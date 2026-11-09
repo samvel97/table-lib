@@ -1,6 +1,6 @@
 import React from 'react'
-import { IColumnConfig } from '../../../../Models/table.models'
-const FreezedHeaderRight = <T extends Object>({
+import { type IColumnConfig } from '../../../../Models/table.models'
+const FreezedHeaderRight = <T extends object>({
   headerColor,
   rightFreezedColumnWidth,
   rightFreezeConfig,

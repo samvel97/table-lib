@@ -1,7 +1,7 @@
 import { Autocomplete, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { ColumnTypeEnums, filterTypesUiHelper, inputSize, numberFields } from '../../../../Models/table.enum'
-import { IComparisonType, ISelect, ItemFields } from '../../../../Models/table.models'
+import { ColumnTypeEnums, filterTypesUiHelper, type inputSize, numberFields } from '../../../../Models/table.enum'
+import { type IComparisonType, type ISelect, type ItemFields } from '../../../../Models/table.models'
 import { filterUiHelper } from '../../../../utils'
 import BetweenDates from './UiTypes/BetweenDates'
 import BetweenNumbers from './UiTypes/BetweenNumbers'
@@ -74,7 +74,7 @@ const APIFilter = ({
   ]
 
   const handleChangeValue = (value: any) => {
-    let columnFilter: ItemFields = {
+    const columnFilter: ItemFields = {
       ...filterTyping,
       PropertyName: item.ColumnName,
       Values: [],
@@ -103,15 +103,16 @@ const APIFilter = ({
   }
 
   const handleChangeRange = (from: string, to: string) => {
-    let columnFilter: ItemFields = filterTyping
+    // Work on a copy: mutating the state object hid changes from React and from the consumer.
+    const columnFilter: ItemFields = { ...filterTyping, Values: [...filterTyping.Values] }
     checkIsDisabled(false)
 
     if (from === '' && to === '') {
       columnFilter.Values = []
     } else {
       if (item.ColumnType !== ColumnTypeEnums.Date) {
-        let numericFrom = +from
-        let numericTo = +to
+        const numericFrom = +from
+        const numericTo = +to
         columnFilter.Values = [numericFrom, numericTo]
       } else {
         columnFilter.Values = [from, to]
@@ -122,7 +123,8 @@ const APIFilter = ({
   }
 
   const handleChangeValueSingleInputs = (value: any) => {
-    let columnFilter: ItemFields = filterTyping
+    // Work on a copy: mutating the state object hid changes from React and from the consumer.
+    const columnFilter: ItemFields = { ...filterTyping, Values: [...filterTyping.Values] }
 
     if (value === 'invalid' && item.ColumnType === ColumnTypeEnums.Date) {
       checkIsDisabled(true)
@@ -134,7 +136,7 @@ const APIFilter = ({
       columnFilter.Search = ''
     } else {
       if (numberFields.includes(item.ColumnType)) {
-        let numeric = +value
+        const numeric = +value
         columnFilter.Values[0] = numeric
         columnFilter.Search = numeric
       } else {
@@ -147,7 +149,7 @@ const APIFilter = ({
   }
 
   const selectComparisonType = (value: any) => {
-    let columnFilter: ItemFields = {
+    const columnFilter: ItemFields = {
       ...filterTyping,
       PropertyName: item.ColumnName,
       Search: '',
@@ -180,7 +182,7 @@ const APIFilter = ({
     setColumnName(options)
   }
 
-  const handleSelectItems = (checkedItems: any[], isOpened: boolean, fieldName?: string) => {
+  const handleSelectItems = (checkedItems: any[], isOpened: boolean, _fieldName?: string) => {
     if (isOpened) {
       getFilteredData?.(
         {
@@ -199,7 +201,7 @@ const APIFilter = ({
         return { ...prev, ComparisonType: filterTyping.TypeForUi }
       })
     } else {
-      let filteredData = {
+      const filteredData = {
         ...filterTyping,
         Values: checkedItems,
         CheckedItems: checkedItems,
@@ -213,7 +215,7 @@ const APIFilter = ({
     }
   }
 
-  const setCheckedItemsLocaly = (option: any[], closeCallBack?: () => void) => {
+  const setCheckedItemsLocaly = (option: any[], _closeCallBack?: () => void) => {
     setfilterTyping((prev) => {
       return { ...prev, CheckedItems: option }
     })
@@ -391,18 +393,17 @@ const APIFilter = ({
               sx={{ ':hover': { cursor: 'pointer' } }}
               id='controllable-states-demo'
               options={typeElem.FilterTypes}
-              renderOption={(props, option, { selected }) => {
+              renderOption={({ key, ...optionProps }, option) => {
                 return (
-                  <div key={props.id}>
-                    <li
-                      {...props}
-                      style={{
-                        padding: '6px 16px',
-                      }}
-                    >
-                      {filterTypesUiHelper[option as keyof typeof filterTypesUiHelper]}
-                    </li>
-                  </div>
+                  <li
+                    key={key}
+                    {...optionProps}
+                    style={{
+                      padding: '6px 16px',
+                    }}
+                  >
+                    {filterTypesUiHelper[option as keyof typeof filterTypesUiHelper]}
+                  </li>
                 )
               }}
               renderInput={(params) => (

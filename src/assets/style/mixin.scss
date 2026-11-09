@@ -1,4 +1,4 @@
-@import "./variables";
+@use './variables' as *;
 
 @mixin screen-max-width-1200 {
   @media (max-width: $max-width-1200) {

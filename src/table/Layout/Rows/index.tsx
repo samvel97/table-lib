@@ -1,10 +1,17 @@
+import type { TableIcon } from '../../../Models/table.models'
+import { type RowId } from '../../../utils/rowId'
+import { forwardRef } from 'react'
 import React from 'react'
-import { IColumnConfig, IColumnConfigStructure, ILinksList, IrowActions } from '../../../Models/table.models'
+import {
+  type IColumnConfig,
+  type IColumnConfigStructure,
+  type ILinksList,
+  type IrowActions,
+} from '../../../Models/table.models'
 import FreezedRows from './FreezedTop'
 import MainRows from './Main'
-import { forwardRef } from 'react'
 
-interface IRows<T extends Object> {
+interface IRows<T extends object> {
   columnsConfigStructure: IColumnConfigStructure<T>
   rightFreezeConfig?: IColumnConfig<T>[]
   unFreezedRows: T[]
@@ -22,7 +29,7 @@ interface IRows<T extends Object> {
   freezedLeftSideColor?: string
   freezedRightSideColor?: string
   freezedRightSide?: string
-  RightSideIcon?: React.MemoExoticComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
+  RightSideIcon?: TableIcon
   leftFreezedColumnWidth?: number
   rightFreezedColumnWidth?: number
   headerHeight?: number
@@ -34,11 +41,11 @@ interface IRows<T extends Object> {
   RightSideSelfAction?: (option: number | string) => void
   freezeRow(e: any, option: number): void
   unFreezeRow(e: any, option: number): void
-  handleCheck(option: number): void
+  handleCheck(id: RowId): void
   dragDropFreezeRow(option: T[]): void
-  isCheckedRows(option: number): boolean
-  isCheckedRows(option: number): boolean
-  getRowForDropdown(option: number): void
+  isCheckedRows(id: RowId): boolean
+  isCheckedRows(id: RowId): boolean
+  getRowForDropdown(id: RowId): void
 }
 const Rows = forwardRef<any, IRows<any>>(
   (

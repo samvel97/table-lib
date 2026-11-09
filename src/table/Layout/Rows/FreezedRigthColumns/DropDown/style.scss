@@ -1,18 +1,17 @@
-.G-right-freezed-dropdown{
-    padding: 12px 24px;
-    width: 240px ;
-    border-radius: 4px;
-    border: 1px solid var(--color-light-100, #ECECEC);
-    background: #FFF;
-    box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.04);
-    .G-item-element {
-        cursor: pointer;
-        padding: 12px 0px;
-        .G-dropdown-list-style{
-            font-size: 14px;
-            color: black;
-            display: flex;
-          }
+.G-right-freezed-dropdown {
+  padding: 12px 24px;
+  width: 240px;
+  border-radius: 4px;
+  border: 1px solid var(--color-light-100, #ececec);
+  background: #fff;
+  box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.04);
+  .G-item-element {
+    cursor: pointer;
+    padding: 12px 0px;
+    .G-dropdown-list-style {
+      font-size: 14px;
+      color: black;
+      display: flex;
     }
-
+  }
 }

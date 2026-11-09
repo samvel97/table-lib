@@ -1,15 +1,13 @@
-import React from 'react'
 import {
-  IColumnConfig,
-  IColumnConfigStructure,
-  IColumnHeaderStructure,
-  IColumnTotalStructure,
-  ITotalList,
+  type IColumnConfig,
+  type IColumnConfigStructure,
+  type IColumnHeaderStructure,
+  type ITotalList,
 } from '../../../Models/table.models'
 import FooterFreezedLeft from './FreezedLeft'
 import FooterFreezedRight from './FreezedRight'
 import FooterMain from './Main'
-interface IFooter<T extends Object> {
+interface IFooter<T extends object> {
   columnsHeaderStructure: IColumnHeaderStructure
   columnsConfigStructure: IColumnConfigStructure<T>
   rightFreezeConfig?: IColumnConfig<T>[]
@@ -26,7 +24,7 @@ interface IFooter<T extends Object> {
   multipleCheck?: boolean
   handleArgChange?(columnName: string, type: string): void
 }
-const Footer = <T extends Object>({
+const Footer = <T extends object>({
   columnsConfigStructure,
   columnsHeaderStructure,
   rightFreezeConfig,

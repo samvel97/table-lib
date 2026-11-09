@@ -1,9 +1,9 @@
-//@ts-nocheck
+import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
 import { Autocomplete, CircularProgress, TextField, Checkbox, Skeleton } from '@mui/material'
 import FormControl from '@mui/material/FormControl'
-import React, { SyntheticEvent, memo, useEffect, useState } from 'react'
-import { inputSize } from '../../../../../Models/table.enum'
-import { IComparisonType, ISelect, ISelected, ItemFields } from '../../../../../Models/table.models'
+import { type SyntheticEvent, memo, useState } from 'react'
+import { type inputSize } from '../../../../../Models/table.enum'
+import { type IComparisonType, type ISelect, type ItemFields } from '../../../../../Models/table.models'
 
 interface IMultipleSelectCheckmarks {
   item: IComparisonType
@@ -62,18 +62,14 @@ const MultipleSelectCheckmarks = ({
   }
   const isEmpty = item.ColumnName === columnName && !isLoadingFilters && !perColumnListForFilters?.length
 
-  const getLabel = (options: ISelect) => {
-    if (typeof options.name !== 'string') {
-      return options + ''
-    }
-    return options.name as string
-  }
+  // Free text (freeSolo) arrives as a string; numeric names were rendered as "[object Object]" in v7.
+  const getLabel = (option: string | ISelect) => (typeof option === 'string' ? option : String(option.name))
+  const optionId = (option: string | ISelect) => (typeof option === 'string' ? option : option.id)
 
-  useEffect(() => {
-    if (item.ColumnName === filterTyping.PropertyName) {
-      setCheckedItems(filterTyping.CheckedItems)
-    }
-  }, [filterTyping])
+  // Show the applied filter values when the filter changes.
+  useSyncOnChange(filterTyping, (filter) => {
+    if (item.ColumnName === filter.PropertyName) setCheckedItems(filter.CheckedItems)
+  })
 
   return (
     <div
@@ -90,7 +86,7 @@ const MultipleSelectCheckmarks = ({
             left: 0,
             width: '100%',
             height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, )',
+            backgroundColor: 'transparent',
             zIndex: 999,
           }}
         ></div>
@@ -109,36 +105,36 @@ const MultipleSelectCheckmarks = ({
           getOptionLabel={getLabel}
           // onOpen={handleOpenList}
           // onClose={handleCloseList}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
+          isOptionEqualToValue={(option, value) => optionId(option) === optionId(value)}
           disableCloseOnSelect
           size={inputSizes}
           disabled={isDisabled && item.ColumnName !== columnName}
           freeSolo
-          renderOption={(props, option, { selected }) => {
+          renderOption={({ key, ...optionProps }, option, { selected }) => {
+            // MUI passes key inside props; React 19 warns when it is spread, so pass it explicitly.
             return (
-              <div key={props.id} style={{ textAlign: 'center' }}>
-                <li
-                  {...props}
-                  style={{
-                    marginLeft: 5,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    minHeight: 40,
-                    borderBottom: option.name === '' ? '1px solid silver' : 'none',
-                  }}
-                >
-                  {item.ColumnName === columnName && isLoadingFilters ? (
-                    <div style={{ width: '100%' }}>
-                      <Skeleton />
-                    </div>
-                  ) : (
-                    <>
-                      <div style={{ textAlign: 'start' }}>{option.name}</div>
-                      <Checkbox style={{ marginRight: 8 }} checked={selected} />
-                    </>
-                  )}
-                </li>
-              </div>
+              <li
+                key={key}
+                {...optionProps}
+                style={{
+                  marginLeft: 5,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  minHeight: 40,
+                  borderBottom: getLabel(option) === '' ? '1px solid silver' : 'none',
+                }}
+              >
+                {item.ColumnName === columnName && isLoadingFilters ? (
+                  <div style={{ width: '100%' }}>
+                    <Skeleton />
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ textAlign: 'start' }}>{getLabel(option)}</div>
+                    <Checkbox style={{ marginRight: 8 }} checked={selected} />
+                  </>
+                )}
+              </li>
             )
           }}
           renderInput={(params) => (
@@ -179,7 +175,7 @@ const MultipleSelectCheckmarks = ({
             width: '100%',
           }}
         >
-          {translations?.filterAction.emptyFieldData || 'Empty data'}
+          {translations?.filterAction?.emptyFieldData || 'Empty data'}
         </div>
       ) : null}
     </div>

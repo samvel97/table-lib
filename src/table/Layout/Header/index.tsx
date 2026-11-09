@@ -1,10 +1,14 @@
 import React from 'react'
-import { IColumnConfig, IColumnConfigStructure, IColumnHeaderStructure } from '../../../Models/table.models'
+import {
+  type IColumnConfig,
+  type IColumnConfigStructure,
+  type IColumnHeaderStructure,
+} from '../../../Models/table.models'
 import FreezedHeaderLeft from './freezedLeft'
 import HeaderMain from './main'
 import FreezedHeaderRight from './freezedRigth'
 
-interface IHeader<T extends Object> {
+interface IHeader<T extends object> {
   columnsConfigStructure: IColumnConfigStructure<T>
   rightFreezeConfig?: IColumnConfig<T>[]
   columnsHeaderStructure: IColumnHeaderStructure
@@ -18,7 +22,7 @@ interface IHeader<T extends Object> {
   hasOrdering?: boolean
   handleSorting?(option: string): void
 }
-const Header = <T extends Object>({
+const Header = <T extends object>({
   columnsConfigStructure,
   rightFreezeConfig,
   columnsHeaderStructure,

@@ -1,10 +1,10 @@
 import React from 'react'
 import { StructureConfig } from '../../../../Models/table.enum'
-import { IFreezeProps } from '../../../../Models/table.models'
+import { type IFreezeProps } from '../../../../Models/table.models'
 import { forwardRef } from 'react'
 
 const FreezedLeftColumns = forwardRef<any, IFreezeProps<any>>(
-  ({ columnsConfigStructure, columnMinWidth, item, freezedLeftSideColor, isLoadedData }, ref) => {
+  ({ columnsConfigStructure, columnMinWidth, item, freezedLeftSideColor, isLoadedData }, _ref) => {
     return (
       <>
         {columnsConfigStructure[StructureConfig.Freezed].items.map((column) => {

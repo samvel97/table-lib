@@ -1,11 +1,9 @@
-import React, { useState } from 'react'
-import { ILinksList, IrowActions } from '../../../../Models/table.models'
+import { type ILinksList, type IrowActions } from '../../../../Models/table.models'
 import { useRef } from 'react'
 import FreezeRowSvgIcon from '../../../../svgIcons/FrameSvgIcon'
 import EditSvgIcon from '../../../../svgIcons/EditSvgIcon'
 import DeleteSvgIcon from '../../../../svgIcons/DeleteSvgIcon'
-import Select from '../../../../components/select/select'
-interface IHoveredRow<T extends Object> {
+interface IHoveredRow<T extends object> {
   rowActions?: IrowActions[]
   item: T
   index: number
@@ -15,28 +13,22 @@ interface IHoveredRow<T extends Object> {
   rowsFreezeAction?: boolean
   freezeRow(e: any, option: number): void
 }
-const HoveredRow = <T extends Object>({
+const HoveredRow = <T extends object>({
   rowActions,
   item,
   index,
   freezedRows,
   FreezeIcon,
   rowsFreezeAction,
-  links,
   freezeRow,
 }: IHoveredRow<T>) => {
   const ref = useRef<any>(null)
-  const [isOpenList, setOpen] = useState<boolean>(false)
-  // const setIsOpenList = () => {
-  //   setOpen((prev) => !prev);
-  // };
 
   return (
-    <li className='G-rows-icons' onMouseLeave={() => setOpen(false)}>
+    <li className='G-rows-icons'>
       <div className='G-icons-group' ref={ref}>
         {rowActions && rowActions.length
-          ? //@ts-ignore
-            rowActions.map((elem, index) => {
+          ? rowActions.map((elem, index) => {
               if (index < 3)
                 return (
                   <div
@@ -50,21 +42,6 @@ const HoveredRow = <T extends Object>({
                 )
             })
           : null}
-        {/* {links && (
-          <div className="G-modal-Icon">
-            <Select
-              optionsList={links}
-              value={""}
-              selectedNameKey={"name"}
-              selectedValueKey={"id"}
-              isOpenList={isOpenList}
-              setIsOpenList={setIsOpenList}
-              customClass={"G-drop"}
-              rowItem={item}
-              haveIcon
-            />
-          </div>
-        )} */}
         {freezedRows.length < 3 && rowsFreezeAction && (
           <>
             <div

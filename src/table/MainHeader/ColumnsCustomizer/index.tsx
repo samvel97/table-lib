@@ -1,111 +1,16 @@
-import React, { memo, useEffect, useMemo, useState } from 'react'
-import { DragDropContext, Draggable, DropResult, Droppable } from 'react-beautiful-dnd'
+import { memo, useMemo, useState, type MouseEvent, type ReactElement } from 'react'
+import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
+import { Button } from '@mui/material'
 import { StructureConfig } from '../../../Models/table.enum'
-import { IColumnConfigStructure, IColumnHeaderStructure, IColumns } from '../../../Models/table.models'
+import type { IColumnConfig, IColumnConfigStructure, IColumnHeaderStructure } from '../../../Models/table.models'
 import Checkbox from '../../../components/checkbox'
 import PopUp from '../../../components/popUp'
 import ColumnsSvgIcon from '../../../svgIcons/ColumnsSvgIcon'
 import GroupSvgIcons from '../../../svgIcons/GroupSvgIcon'
+import { MAX_PINNED_COLUMNS, moveColumn, toColumnMove, type ColumnList } from './moveColumn'
 import './style.scss'
-import { Button, Tooltip } from '@mui/material'
-const onDragEnd = <T extends Object>(
-  result: DropResult,
-  columnsConfigStructure: IColumnConfigStructure<T>,
-  columnsHeaderStructure: IColumnHeaderStructure,
-  setFreezeValidation?: React.Dispatch<React.SetStateAction<boolean>>,
-  setColumnsConfigStructure?: (option: IColumnConfigStructure<T>) => void,
-  setColumnHeaderStructure?: (options: IColumnHeaderStructure) => void,
-) => {
-  if (!result.destination) return
-  const { source, destination } = result
 
-  if (source.droppableId !== destination.droppableId) {
-    if (
-      columnsConfigStructure[StructureConfig.Freezed].items.length === 3 &&
-      source.droppableId !== StructureConfig.Freezed
-    ) {
-      setFreezeValidation && setFreezeValidation(true)
-      return
-    }
-    setFreezeValidation && setFreezeValidation(false)
-    //header
-    // @ts-ignore
-    const headersourceColumn = columnsHeaderStructure[source.droppableId]
-    // @ts-ignore
-    const headerdestColumn = columnsHeaderStructure[destination.droppableId]
-    const headersourceItems = [...headersourceColumn.items]
-    const headerdestItems = [...headerdestColumn.items]
-    const [headerremoved] = headersourceItems.splice(source.index, 1)
-    headerdestItems.splice(destination.index, 0, headerremoved)
-
-    //config
-    // @ts-ignore
-    const sourceColumn = columnsConfigStructure[source.droppableId]
-    // @ts-ignore
-    const destColumn = columnsConfigStructure[destination.droppableId]
-    const sourceItems = [...sourceColumn.items]
-    const destItems = [...destColumn.items]
-    const [removed] = sourceItems.splice(source.index, 1)
-    destItems.splice(destination.index, 0, removed)
-
-    setColumnsConfigStructure &&
-      setColumnsConfigStructure({
-        ...columnsConfigStructure,
-        [source.droppableId]: {
-          ...sourceColumn,
-          items: sourceItems,
-        },
-        [destination.droppableId]: {
-          ...destColumn,
-          items: destItems,
-        },
-      })
-    setColumnHeaderStructure &&
-      setColumnHeaderStructure({
-        ...columnsHeaderStructure,
-        [source.droppableId]: {
-          ...sourceColumn,
-          items: headersourceItems,
-        },
-        [destination.droppableId]: {
-          ...destColumn,
-          items: headerdestItems,
-        },
-      })
-  } else {
-    //header
-    // @ts-ignore
-    const headercolumn = columnsHeaderStructure[source.droppableId]
-    const headercopiedItems = [...headercolumn.items]
-    const [headerremoved] = headercopiedItems.splice(source.index, 1)
-    headercopiedItems.splice(destination.index, 0, headerremoved)
-    //config
-    // @ts-ignore
-    const column = columnsConfigStructure[source.droppableId]
-    const copiedItems = [...column.items]
-    const [removed] = copiedItems.splice(source.index, 1)
-    copiedItems.splice(destination.index, 0, removed)
-
-    setColumnsConfigStructure &&
-      setColumnsConfigStructure({
-        ...columnsConfigStructure,
-        [source.droppableId]: {
-          ...column,
-          items: copiedItems,
-        },
-      })
-    setColumnHeaderStructure &&
-      setColumnHeaderStructure({
-        ...columnsHeaderStructure,
-        [source.droppableId]: {
-          ...column,
-          items: headercopiedItems,
-        },
-      })
-  }
-}
-
-interface IColumnsCustomizer<T extends Object> {
+interface IColumnsCustomizer<T extends object> {
   translations?: Record<string, any>
   columnsConfigStructure: IColumnConfigStructure<T>
   setColumnsConfigStructure?: (option: IColumnConfigStructure<T>) => void
@@ -113,7 +18,11 @@ interface IColumnsCustomizer<T extends Object> {
   setColumnHeaderStructure?: (options: IColumnHeaderStructure) => void
   storeStructure?: () => void
 }
-function ColumnsCustomizer<T extends Object>({
+
+const LISTS: ColumnList[] = [StructureConfig.Main, StructureConfig.Freezed]
+
+/** "Customize columns" popup: show/hide columns, reorder them and pin up to three. */
+function ColumnsCustomizer<T extends object>({
   columnsConfigStructure,
   setColumnsConfigStructure,
   columnsHeaderStructure,
@@ -121,223 +30,143 @@ function ColumnsCustomizer<T extends Object>({
   storeStructure,
   translations,
 }: IColumnsCustomizer<T>) {
-  const [visibleColumnsCount, setVisibleColumnsCount] = useState<number>()
-  const [freezeValidation, setFreezeValidation] = useState<boolean>(false)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const texts = translations?.customizationAction
+  const [pinnedLimitReached, setPinnedLimitReached] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = Boolean(anchorEl)
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-  const handleCheck = (index: number, type: string, visible: boolean) => {
-    if (type === 'Columns') {
-      if (visibleColumnsCount === 1 && visible) {
-        return
-      }
-
-      setColumnsConfigStructure?.({
-        ...columnsConfigStructure,
-        [StructureConfig.Main]: {
-          ...columnsConfigStructure[StructureConfig.Main],
-          items: columnsConfigStructure[StructureConfig.Main].items.map((item, indexx) => {
-            if (index === indexx) {
-              return { ...item, isVisible: !item.isVisible }
-            }
-            return item
-          }),
-        },
-      })
-    } else {
-      if (visibleColumnsCount === 1 && visible) {
-        return
-      }
-
-      setColumnsConfigStructure?.({
-        ...columnsConfigStructure,
-        [StructureConfig.Freezed]: {
-          ...columnsConfigStructure[StructureConfig.Freezed],
-          items: columnsConfigStructure[StructureConfig.Freezed].items.map((item, indexx) => {
-            if (index === indexx) {
-              return { ...item, isVisible: !item.isVisible }
-            }
-            return item
-          }),
-        },
-      })
-    }
-  }
   const allColumns = useMemo(
-    () => [
-      ...columnsConfigStructure[StructureConfig.Main].items,
-      ...columnsConfigStructure[StructureConfig.Freezed].items,
-    ],
+    () => [...columnsConfigStructure.Main.items, ...columnsConfigStructure.Freezed.items],
     [columnsConfigStructure],
   )
+  const visibleColumnsCount = allColumns.filter((column) => column.isVisible).length
 
-  useEffect(() => {
-    let count = 0
-    allColumns.map((item) => {
-      if (item.isVisible) {
-        count += 1
-      }
-    })
-    setVisibleColumnsCount(count)
-  }, [columnsConfigStructure])
+  const handleDragEnd = (result: DropResult) => {
+    const columnMove = toColumnMove(result)
+    if (!columnMove) return
+    const moved = moveColumn(columnsConfigStructure, columnsHeaderStructure, columnMove)
+    setPinnedLimitReached(!moved.ok)
+    if (!moved.ok) return
+    setColumnsConfigStructure?.(moved.config)
+    setColumnHeaderStructure?.(moved.header)
+  }
+
+  const toggleVisibility = (list: ColumnList, index: number, isVisible: boolean) => {
+    // At least one column must stay visible.
+    if (isVisible && visibleColumnsCount === 1) return
+    const items = columnsConfigStructure[list].items.map((column, i) =>
+      i === index ? { ...column, isVisible: !column.isVisible } : column,
+    )
+    setColumnsConfigStructure?.({ ...columnsConfigStructure, [list]: { ...columnsConfigStructure[list], items } })
+  }
+
+  /** Column label: explicit `columnName`, otherwise the header title of the same column. */
+  const columnLabel = (list: ColumnList, column: IColumnConfig<T>, index: number) =>
+    String(column.columnName ?? columnsHeaderStructure[list]?.items[index]?.title ?? '')
+
+  const handleSave = () => {
+    storeStructure?.()
+    setAnchorEl(null)
+  }
 
   return (
     <div className='G-costumize-wrapper'>
       <PopUp
-        style={{
-          textTransform: 'capitalize',
-        }}
+        style={{ textTransform: 'capitalize' }}
         ActiveIcon={ColumnsSvgIcon}
         open={open}
         anchorEl={anchorEl}
-        handleClick={handleClick}
-        handleClose={handleClose}
-        modalName={translations?.customizationAction.modalName || 'Customize Columns'}
+        handleClick={(event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)}
+        handleClose={() => setAnchorEl(null)}
+        modalName={texts?.modalName || 'Customize Columns'}
       >
         <div className='G-costumize-modal'>
           <div className='G-align-center G-costumize-header'>
             <div className='G-flex-column'>
               <div>
-                {translations?.customizationAction.info || 'Visible columns are '}
+                {texts?.info || 'Visible columns are '}
                 {visibleColumnsCount} - {allColumns.length}
               </div>
-              <div>
-                {freezeValidation
-                  ? translations?.customizationAction.validationMessage ||
-                    'The maximum number of freezing columns can be 3'
+              <div role='alert'>
+                {pinnedLimitReached
+                  ? texts?.validationMessage || `The maximum number of freezing columns can be ${MAX_PINNED_COLUMNS}`
                   : ''}
               </div>
             </div>
           </div>
           <div className='G-flex G-columns-header'>
             <div className='G-flex' style={{ width: '50%' }}>
-              {translations?.customizationAction.columns || 'Columns'}
+              {texts?.columns || 'Columns'}
             </div>
             <div className='G-flex' style={{ width: '50%' }}>
-              {translations?.customizationAction.pinnedColumns || 'Pinned Columns'}
+              {texts?.pinnedColumns || 'Pinned Columns'}
             </div>
           </div>
-          <div
-            className='G-align-center'
-            style={{
-              height: '100%',
-            }}
-          >
-            <DragDropContext
-              onDragEnd={(result) =>
-                onDragEnd(
-                  result,
-                  columnsConfigStructure,
-                  columnsHeaderStructure,
-                  setFreezeValidation,
-                  setColumnsConfigStructure,
-                  setColumnHeaderStructure,
-                )
-              }
-            >
-              {Object.entries(columnsConfigStructure).map(([columnId, column]: [string, IColumns<T>], indexx) => {
-                return (
-                  <div className='G-column-center' key={columnId}>
-                    <div
-                      style={{
-                        margin: columnId === 'Freezed' ? '8px 24px 8px 8px' : 8,
-                      }}
-                    >
-                      <Droppable droppableId={typeof columnId === 'string' ? columnId : '' + columnId} key={columnId}>
-                        {(provided) => {
-                          return (
-                            <div
-                              {...provided.droppableProps}
-                              ref={provided.innerRef}
-                              className='G-left-column'
-                              style={{
-                                background: columnId === 'Freezed' ? '#F6F6F6' : 'white',
-                              }}
-                            >
-                              {column.items.map((item, index) => {
-                                return (
-                                  <Draggable
-                                    key={item.id}
-                                    draggableId={typeof item.id === 'string' ? item.id : '' + item.id}
-                                    index={index}
-                                  >
-                                    {(provided, snapshot) => {
-                                      return (
-                                        <div
-                                          ref={provided.innerRef}
-                                          {...provided.draggableProps}
-                                          {...provided.dragHandleProps}
-                                          style={{
-                                            userSelect: 'none',
-                                            padding: 13,
-                                            width: 235,
-                                            backgroundColor: snapshot.isDragging ? '#F0F4F6' : 'rgba(255, 255, 255,0)',
-                                            ...provided.draggableProps.style,
-                                          }}
-                                          className='G-justify-between'
-                                        >
-                                          <div
-                                            className='G-justify-start '
-                                            style={{
-                                              alignItems: 'center',
-                                              height: '24px',
-                                            }}
-                                          >
-                                            <div
-                                              className='G-justify-center'
-                                              style={{
-                                                marginRight: 8,
-                                              }}
-                                            >
-                                              <GroupSvgIcons />
-                                            </div>
-                                            <Checkbox
-                                              isCheck={item.isVisible}
-                                              onClick={() =>
-                                                handleCheck(index, indexx === 1 ? 'Freezed' : 'Columns', item.isVisible)
-                                              }
-                                              customClass='G-checkbox'
-                                            />
-                                          </div>
-                                          <div className='G-item-name'>
-                                            <div className='G-item-name-text' title={String(item.columnName)}>
-                                              {item.columnName}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      )
+          <div className='G-align-center' style={{ height: '100%' }}>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              {LISTS.map((list) => (
+                <div className='G-column-center' key={list}>
+                  <div style={{ margin: list === StructureConfig.Freezed ? '8px 24px 8px 8px' : 8 }}>
+                    <Droppable droppableId={list}>
+                      {(droppable) => (
+                        <div
+                          {...droppable.droppableProps}
+                          ref={droppable.innerRef}
+                          className='G-left-column'
+                          style={{ background: list === StructureConfig.Freezed ? '#F6F6F6' : 'white' }}
+                        >
+                          {columnsConfigStructure[list].items.map((column, index) => {
+                            const label = columnLabel(list, column, index)
+                            return (
+                              <Draggable key={column.id} draggableId={String(column.id)} index={index}>
+                                {(draggable, snapshot) => (
+                                  <div
+                                    ref={draggable.innerRef}
+                                    {...draggable.draggableProps}
+                                    {...draggable.dragHandleProps}
+                                    style={{
+                                      userSelect: 'none',
+                                      padding: 13,
+                                      width: 235,
+                                      backgroundColor: snapshot.isDragging ? '#F0F4F6' : 'transparent',
+                                      ...draggable.draggableProps.style,
                                     }}
-                                  </Draggable>
-                                )
-                              })}
-                              {provided.placeholder}
-                            </div>
-                          )
-                        }}
-                      </Droppable>
-                    </div>
+                                    className='G-justify-between'
+                                  >
+                                    <div className='G-justify-start' style={{ alignItems: 'center', height: 24 }}>
+                                      <div className='G-justify-center' style={{ marginRight: 8 }}>
+                                        <GroupSvgIcons />
+                                      </div>
+                                      <Checkbox
+                                        isCheck={column.isVisible}
+                                        onClick={() => toggleVisibility(list, index, column.isVisible)}
+                                        customClass='G-checkbox'
+                                        ariaLabel={label}
+                                      />
+                                    </div>
+                                    <div className='G-item-name'>
+                                      <div className='G-item-name-text' title={label}>
+                                        {label}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </Draggable>
+                            )
+                          })}
+                          {droppable.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
                   </div>
-                )
-              })}
+                </div>
+              ))}
             </DragDropContext>
           </div>
           {storeStructure && (
             <div style={{ padding: 8 }}>
-              <Button
-                size='medium'
-                fullWidth
-                onClick={(e) => {
-                  storeStructure()
-                  handleClose?.()
-                }}
-              >
-                {translations?.customizationAction.actionButtonName || 'Save'}
+              <Button size='medium' fullWidth onClick={handleSave}>
+                {texts?.actionButtonName || 'Save'}
               </Button>
             </div>
           )}
@@ -347,4 +176,4 @@ function ColumnsCustomizer<T extends Object>({
   )
 }
 
-export default memo(ColumnsCustomizer) as <T extends Object>(props: IColumnsCustomizer<T>) => JSX.Element
+export default memo(ColumnsCustomizer) as <T extends object>(props: IColumnsCustomizer<T>) => ReactElement

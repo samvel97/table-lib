@@ -1,8 +1,8 @@
 import React from 'react'
 import { StructureConfig } from '../../../../Models/table.enum'
-import { IColumnConfigStructure, IColumnHeaderStructure } from '../../../../Models/table.models'
+import { type IColumnConfigStructure, type IColumnHeaderStructure } from '../../../../Models/table.models'
 import FreezedItem from './FreezedItem'
-interface IFreezedTopLeft<T extends Object> {
+interface IFreezedTopLeft<T extends object> {
   columnsHeaderStructure: IColumnHeaderStructure
   columnsConfigStructure: IColumnConfigStructure<T>
   multipleCheck?: boolean
@@ -12,7 +12,7 @@ interface IFreezedTopLeft<T extends Object> {
   leftFreezedColumnWidth?: number
   handleSorting?(option: string): void
 }
-const FreezedHeaderLeft = <T extends Object>({
+const FreezedHeaderLeft = <T extends object>({
   columnsHeaderStructure,
   columnsConfigStructure,
   multipleCheck,

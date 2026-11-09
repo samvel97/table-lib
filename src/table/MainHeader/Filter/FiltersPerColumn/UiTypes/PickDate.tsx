@@ -1,11 +1,14 @@
-import React, { useState } from 'react'
-import dayjs from 'dayjs'
+import { useState } from 'react'
+import type { Dayjs } from 'dayjs'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { IComparisonType, ItemFields } from '../../../../../Models/table.models'
+import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
+import { PICKER_LAYOUT_SX } from './pickerLayout'
 import ActionList from '../../../../../components/datePickerActionList/ActionList'
-import { inputSize } from '../../../../../Models/table.enum'
+import { DateActionTranslationsContext } from '../../../../../components/datePickerActionList/context'
+import { type inputSize } from '../../../../../Models/table.enum'
+import { toPickerDate } from '../../../../../utils'
 import 'dayjs/locale/en'
 import 'dayjs/locale/ru'
 import 'dayjs/locale/hy-am'
@@ -36,9 +39,9 @@ const PickDate = ({
   handleChangeValue,
 }: IPickDate) => {
   const [errMessage, setErrMessage] = useState('')
-  const handlePick = (newValue: any) => {
+  const handlePick = (newValue: Dayjs | null) => {
     if (newValue !== null && isNaN(newValue.valueOf() as number)) {
-      setErrMessage(translations?.filterAction.validations.invalid || 'invalid')
+      setErrMessage(translations?.filterAction?.validations?.invalid || 'invalid')
     } else {
       setErrMessage('')
 
@@ -56,42 +59,44 @@ const PickDate = ({
     setColumnName(item.ColumnName)
   }
   const handleClose = () => {
-    !isDisabled && setColumnName('')
+    if (!isDisabled) setColumnName('')
   }
   const unFocused = () => {
-    !isDisabled && setColumnName('')
+    if (!isDisabled) setColumnName('')
   }
   return (
     <div className={item.IsBold ? 'IsBold' : ''} style={{ width: advancedSettings ? columnsSizes : '100%' }}>
-      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale}>
-        <div
-          style={{ width: '100%', position: 'relative' }}
-          tabIndex={0}
-          onBlur={unFocused}
-          className={errMessage ? 'date-picker' : ''}
-        >
-          <DateTimePicker
-            slotProps={{ textField: { size: inputSizes } }}
-            timeSteps={{ hours: 1, minutes: 1, seconds: 1 }}
-            minutesStep={1}
-            ampm={false}
-            label={item.key || item.ColumnName}
-            disabled={isDisabled && item.ColumnName !== columnName}
-            displayWeekNumber
-            onOpen={handleOpenList}
-            onClose={handleClose}
-            value={filterTyping.Values.length ? dayjs(filterTyping.Values[0]) : null}
-            format='YYYY-MM-DD HH:mm:ss'
-            onChange={handlePick}
-            views={['year', 'day', 'hours', 'minutes', 'seconds']}
-            sx={{ width: '100%' }}
-            slots={{
-              actionBar: (props) => ActionList(props, translations?.filterAction),
-            }}
-          />
-          {errMessage.length ? <div style={{ color: 'red', fontSize: 12 }}>{errMessage}</div> : null}
-        </div>
-      </LocalizationProvider>
+      <DateActionTranslationsContext.Provider value={translations?.filterAction}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locale ?? undefined}>
+          <div
+            style={{ width: '100%', position: 'relative' }}
+            tabIndex={0}
+            onBlur={unFocused}
+            className={errMessage ? 'date-picker' : ''}
+          >
+            <DateTimePicker
+              slotProps={{ textField: { size: inputSizes }, layout: { sx: PICKER_LAYOUT_SX } }}
+              timeSteps={{ hours: 1, minutes: 1, seconds: 1 }}
+              minutesStep={1}
+              ampm={false}
+              label={item.key || item.ColumnName}
+              disabled={isDisabled && item.ColumnName !== columnName}
+              displayWeekNumber
+              onOpen={handleOpenList}
+              onClose={handleClose}
+              value={toPickerDate(filterTyping.Values[0])}
+              format='YYYY-MM-DD HH:mm:ss'
+              onChange={handlePick}
+              views={['year', 'day', 'hours', 'minutes', 'seconds']}
+              sx={{ width: '100%' }}
+              slots={{
+                actionBar: ActionList,
+              }}
+            />
+            {errMessage ? <div className='filter-error'>{errMessage}</div> : null}
+          </div>
+        </LocalizationProvider>
+      </DateActionTranslationsContext.Provider>
     </div>
   )
 }

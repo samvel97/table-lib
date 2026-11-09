@@ -1,30 +1,30 @@
-.G-count-info{
+.G-count-info {
   margin-right: 48px;
   color: var(--color-text-2-aaa-91, #494949);
 }
-.G-select-text{
+.G-select-text {
   color: var(--color-text-4-aa-461, #757575);
 }
-.G-Select-container{
+.G-Select-container {
   min-width: 56px;
   height: 32px;
-  border:1px solid #EFEFEF ;
+  border: 1px solid #efefef;
   margin: 0 5px;
-   .G-select-header{
-     padding: 0;
-     box-shadow:none;
-     display: flex;
-     justify-content: center;
-     height: 32px;
-     p{
-       width: 50%;
-     }
-     span{
-       font-size: 12px;
-     }
-   }
- }
- .G-pagionation{
-   margin: 0 10px;
-   height: 24px;
- }
+  .G-select-header {
+    padding: 0;
+    box-shadow: none;
+    display: flex;
+    justify-content: center;
+    height: 32px;
+    p {
+      width: 50%;
+    }
+    span {
+      font-size: 12px;
+    }
+  }
+}
+.G-pagionation {
+  margin: 0 10px;
+  height: 24px;
+}

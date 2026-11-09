@@ -1,49 +1,34 @@
-import React from 'react'
-import { PickersActionBarProps } from '@mui/x-date-pickers'
+import { useContext } from 'react'
+import { Button, type ButtonProps } from '@mui/material'
+import { usePickerActionsContext, type PickersActionBarProps } from '@mui/x-date-pickers'
+import { DateActionTranslationsContext } from './context'
 import './style.scss'
-import { Button, Grid } from '@mui/material'
-const ActionList = (props: PickersActionBarProps, translations: Record<string, string>) => {
-  const { onClear, onSetToday, onAccept, className } = props
-  const actions = [
-    { text: translations.confirmFilters, method: onAccept, variant: 'text' },
-    { text: translations.clearDate, method: onClear, variant: 'outlined' },
-    {
-      text: translations.todayButton,
-      method: onSetToday,
-      variant: 'container',
-    },
+
+/** Action bar for the filter date pickers: Apply / Clear / Today plus hour-minute-second labels. */
+export default function ActionList({ className }: PickersActionBarProps) {
+  const translations = useContext(DateActionTranslationsContext)
+  const { acceptValueChanges, clearValue, setValueToToday } = usePickerActionsContext()
+
+  const actions: { label: string; onClick: () => void; variant: ButtonProps['variant'] }[] = [
+    { label: translations?.confirmFilters ?? 'Apply', onClick: acceptValueChanges, variant: 'text' },
+    { label: translations?.clearDate ?? 'Clear', onClick: clearValue, variant: 'outlined' },
+    { label: translations?.todayButton ?? 'Today', onClick: setValueToToday, variant: 'contained' },
   ]
-  const locale = localStorage.getItem('locale')
-  const handlingLocale = locale === 'hy'
 
   return (
-    <div className={`G-justify-between P-date-actions-component ${className}`}>
-      <Grid container gap={1} className='G-flex P-actions-component'>
-        {actions.map(({ text, method, variant }) => (
-          <Grid item xs={3} key={text}>
-            <Button
-              size='medium'
-              variant={variant as any}
-              fullWidth
-              style={{
-                textTransform: 'capitalize',
-                fontSize: handlingLocale ? '12px' : '14px',
-              }}
-              key={text}
-              onClick={method}
-            >
-              {text}
-            </Button>
-          </Grid>
+    <div className={`G-justify-between P-date-actions-component ${className ?? ''}`}>
+      <div className='P-actions-component'>
+        {actions.map(({ label, onClick, variant }) => (
+          <Button key={label} size='small' variant={variant} onClick={onClick} sx={{ textTransform: 'capitalize' }}>
+            {label}
+          </Button>
         ))}
-      </Grid>
+      </div>
       <div className='G-center P-time-component'>
-        <div>{translations.hour}</div>
-        <div>{translations.min}</div>
-        <div>{translations.sec}</div>
+        <div>{translations?.hour ?? 'Hour'}</div>
+        <div>{translations?.min ?? 'Min'}</div>
+        <div>{translations?.sec ?? 'Sec'}</div>
       </div>
     </div>
   )
 }
-
-export default ActionList

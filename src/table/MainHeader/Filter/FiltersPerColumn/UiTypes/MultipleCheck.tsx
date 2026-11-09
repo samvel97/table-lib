@@ -1,15 +1,13 @@
+import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
 import { Autocomplete, Button, Checkbox, CircularProgress, Skeleton, TextField } from '@mui/material'
-import React, { SyntheticEvent, memo, useEffect, useRef, useState } from 'react'
+import React, { Fragment, type SyntheticEvent, memo, useState } from 'react'
 // import Checkbox from "../../../../components/checkbox";
-import {
-  ColumnTypeEnums,
-  ConditionalOperatorsEnums,
-  filterTypesUiHelper,
-  inputSize,
-  numberFields,
-} from '../../../../../Models/table.enum'
-import { IComparisonType, ItemFields } from '../../../../../Models/table.models'
+import { ColumnTypeEnums, type inputSize, numberFields } from '../../../../../Models/table.enum'
+import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
 import { containsOnlyNumbers } from '../../../../../utils'
+
+/** Values are requested 30 at a time; a full page means there may be more to load. */
+const FILTER_VALUES_PAGE_SIZE = 30
 
 interface IMultipleCHeck {
   columnsSizes: string
@@ -59,14 +57,13 @@ const MultipleCheck = ({
 
   const checkList = () => {
     if (item.ColumnName === columnName && perColumnListForFilters && errMessage === '') {
-      let list = perColumnListForFilters
-      list =
+      const list =
         perColumnListForFilters.includes('') && perColumnListForFilters.includes(null)
           ? perColumnListForFilters.slice(1, -1)
           : perColumnListForFilters
 
       if (item.ColumnType === ColumnTypeEnums.EncryptedData) {
-        let drawList = typeof list[0] === 'string' ? list : []
+        const drawList = typeof list[0] === 'string' ? list : []
 
         return val ? drawList : checkedItems
       } else {
@@ -92,7 +89,7 @@ const MultipleCheck = ({
   }
   const selectValue = (event: SyntheticEvent<Element, Event>, value: (string | number)[]) => {
     setCheckedItems(value)
-    let newValues: (number | string)[] = value.map((elem: number | string) => {
+    const newValues: (number | string)[] = value.map((elem: number | string) => {
       return elem === emptyValue ? '' : elem
     })
     if (!isOpened) {
@@ -102,7 +99,7 @@ const MultipleCheck = ({
   }
   const handleOpenList = () => {
     if (!isDisabled) {
-      item.ColumnType !== ColumnTypeEnums.EncryptedData && handleSelectItems([], true, item.ColumnName)
+      if (item.ColumnType !== ColumnTypeEnums.EncryptedData) handleSelectItems([], true, item.ColumnName)
       setColumnName(item.ColumnName)
       setIsOpened(true)
     }
@@ -163,26 +160,20 @@ const MultipleCheck = ({
     TypeForUi: 'GreaterThan',
     ColumnType: item.ColumnType,
   }
-  useEffect(() => {
-    if (item.ColumnName === filterTyping.PropertyName) {
-      let newValues: (string | number)[] = filterTyping.CheckedItems
-      newValues = filterTyping.CheckedItems.map((elem: number | string) => {
-        if (elem === '') {
-          return emptyValue
-        }
-        if (
-          item.ColumnType !== ColumnTypeEnums.Text &&
-          item.ColumnType !== ColumnTypeEnums.TikoType &&
-          item.ColumnType !== ColumnTypeEnums.Base36Id
-        ) {
-          return elem + ''
-        }
-        return elem
-      })
-
-      setCheckedItems(newValues)
-    }
-  }, [filterTyping])
+  // Show the applied filter values when the filter changes.
+  useSyncOnChange(filterTyping, (filter) => {
+    if (item.ColumnName !== filter.PropertyName) return
+    const keepsType =
+      item.ColumnType === ColumnTypeEnums.Text ||
+      item.ColumnType === ColumnTypeEnums.TikoType ||
+      item.ColumnType === ColumnTypeEnums.Base36Id
+    setCheckedItems(
+      filter.CheckedItems.map((value: number | string) => {
+        if (value === '') return emptyValue
+        return keepsType ? value : String(value)
+      }),
+    )
+  })
 
   return (
     <div
@@ -222,12 +213,12 @@ const MultipleCheck = ({
         freeSolo
         size={inputSizes}
         sx={{ fontSize: '8px' }}
-        filterOptions={(options, state) => options}
-        renderOption={(props, option, { selected }) => {
+        filterOptions={(options) => options}
+        renderOption={({ key, ...optionProps }, option, { selected }) => {
           return (
-            <div key={props.id} style={{ textAlign: 'center' }}>
+            <Fragment key={key}>
               <li
-                {...props}
+                {...optionProps}
                 style={{
                   marginLeft: 5,
                   display: 'flex',
@@ -253,8 +244,8 @@ const MultipleCheck = ({
                 )}
               </li>
               {option === perColumnListForFilters?.at(-1) ? (
-                <div className='G-center' style={{ width: '100%' }}>
-                  {perColumnTotalCount === 30 ? (
+                <li className='G-center' role='presentation' style={{ width: '100%' }}>
+                  {perColumnTotalCount === FILTER_VALUES_PAGE_SIZE ? (
                     <Button
                       className='G-center'
                       size='large'
@@ -270,9 +261,9 @@ const MultipleCheck = ({
                       {translations?.filterAction.loadMore || 'Load more'}
                     </Button>
                   ) : null}
-                </div>
+                </li>
               ) : null}
-            </div>
+            </Fragment>
           )
         }}
         renderInput={(params) => (

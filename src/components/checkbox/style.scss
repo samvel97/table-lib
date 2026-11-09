@@ -1,7 +1,5 @@
-@import "src/assets/style/variables";
-@import "src/assets/style/mixin";
-@import "src/assets/style/font";
-
+@use '../../assets/style/variables' as *;
+@use '../../assets/style/mixin' as *;
 
 .G-checkbox-component {
   .G-checkbox {
@@ -11,13 +9,13 @@
       width: 20px;
       height: 20px;
       background-color: $white;
-      border: 1px solid #ACBCC3;
+      border: 1px solid #acbcc3;
       border-radius: 1px;
       &.G-active-checkbox {
         background-color: $active-color;
         border: none;
         &:before {
-          content: "";
+          content: '';
           position: absolute;
           background-color: $white;
           border-radius: 2px;
@@ -28,7 +26,7 @@
           left: 20%;
         }
         &:after {
-          content: "";
+          content: '';
           position: absolute;
           background-color: $white;
           border-radius: 2px;
@@ -41,7 +39,7 @@
       }
       &.G-disable-checkbox {
         cursor: default !important;
-        background-color: rgba(225,225,225,0.6);
+        background-color: rgba(225, 225, 225, 0.6);
       }
     }
     &.G-checkbox-secondary {
@@ -53,7 +51,8 @@
       &.G-active-checkbox {
         position: relative;
         border-color: transparent;
-        .G-active-checkbox-secondary-bottom, .G-active-checkbox-secondary-top{
+        .G-active-checkbox-secondary-bottom,
+        .G-active-checkbox-secondary-top {
           opacity: 1;
           visibility: visible;
         }
@@ -71,7 +70,7 @@
         left: -2px;
         bottom: -2px;
         &:after {
-          content: "";
+          content: '';
           width: 2px;
           height: 2px;
           position: absolute;
@@ -108,7 +107,7 @@
       .G-checkbox-mark {
         position: absolute;
         &:before {
-          content: "";
+          content: '';
           position: absolute;
           left: 4px;
           top: 3px;
@@ -121,7 +120,7 @@
           transition: 0.3s;
         }
         &:after {
-          content: "";
+          content: '';
           position: absolute;
           left: 1.7px;
           top: 5.6px;
@@ -133,13 +132,13 @@
           visibility: hidden;
           transition: 0.3s;
         }
-        &.G-checkbox-mark-active{
-          &:after{
+        &.G-checkbox-mark-active {
+          &:after {
             transform: rotate(-491deg) scale(1);
             opacity: 1;
             visibility: visible;
           }
-          &:before{
+          &:before {
             transform: rotate(496deg) scale(1);
             opacity: 1;
             visibility: visible;
@@ -162,4 +161,3 @@
     font-size: 16px;
   }
 }
-

@@ -1,122 +1,115 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { usePagination, DOTS } from './usePagination'
-import './style.scss'
-import { containsOnlyNumbers } from '../../utils'
-import Input from '../Input/Input'
+import { useState, type ChangeEvent, type KeyboardEvent } from 'react'
 import ArrowLeftSvgIcon from '../../svgIcons/ArrowLeftSvgIcon'
 import ArrowRightSvgIcon from '../../svgIcons/ArrowRightSvgIcon'
+import { DOTS, usePagination } from './usePagination'
+import './style.scss'
+
 interface IPagination {
-  onPageChange(page: number | string): void
+  onPageChange(page: number): void
+  /** Total number of rows. */
   totalCount: number
   siblingCount?: number
   currentPage: number
+  /** Rows per page. */
   pageSizeStructure: number
   className?: string
   translations?: Record<string, any>
 }
 
+/** Page buttons plus a "go to page" input. Hidden when everything fits on one page. */
 const Pagination = ({
   onPageChange,
   totalCount,
   siblingCount = 1,
   currentPage,
   pageSizeStructure,
-  className,
+  className = '',
   translations,
 }: IPagination) => {
-  const paginationRange = usePagination({
-    currentPage,
-    totalCount,
-    siblingCount,
-    pageSizeStructure,
-  })
-  const ref = useRef<any>(null)
-  const [val, setVal] = useState('')
-  useEffect(() => {
-    setVal('')
-  }, [totalCount, pageSizeStructure, currentPage])
-  // @ts-ignore
-
-  if (currentPage === 0 || paginationRange.length === 1) {
-    return null
-  }
-  if (currentPage === 0 || totalCount === 1) {
-    return null
-  }
-  // @ts-ignore
-  const lastPage = paginationRange[paginationRange.length - 1]
-  const onNext = () => {
-    if (currentPage < +lastPage) onPageChange(currentPage + 1)
+  const pages = usePagination({ currentPage, totalCount, siblingCount, pageSizeStructure })
+  const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(1, pageSizeStructure)))
+  const [goTo, setGoTo] = useState('')
+  // Clear the "go to" field whenever the page or page size changes (state reset during render, no effect needed).
+  const resetKey = `${currentPage}-${pageSizeStructure}-${totalCount}`
+  const [lastResetKey, setLastResetKey] = useState(resetKey)
+  if (resetKey !== lastResetKey) {
+    setLastResetKey(resetKey)
+    setGoTo('')
   }
 
-  const onPrevious = () => {
-    if (currentPage > 1) onPageChange(currentPage - 1)
-  }
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target
-    if (ref.current && containsOnlyNumbers(value) && +value <= Math.ceil(totalCount / pageSizeStructure)) setVal(value)
+  if (currentPage === 0 || pages.length === 1) return null
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages && page !== currentPage) onPageChange(page)
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && ref.current && val.trim() && val !== '0') {
-      onPageChange(+ref.current.value)
-    }
+  const handleGoToChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target
+    if (value === '' || (/^\d+$/.test(value) && +value <= totalPages)) setGoTo(value)
   }
+
+  const handleGoToKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter' && goTo && goTo !== '0') goToPage(+goTo)
+  }
+
+  const goToLabel = translations?.pagination?.to || 'Go to'
 
   return (
-    <>
+    <nav className='G-flex G-align-center' aria-label='Pagination'>
       <ul className={`pagination-container ${className} G-flex G-align-center G-justify-between`}>
-        <li className={`pagination-item ${currentPage === 1 ? 'disabled' : ''}`} onClick={onPrevious}>
-          <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+        <li className={`pagination-item ${currentPage === 1 ? 'disabled' : ''}`}>
+          <button
+            type='button'
+            className='pagination-button'
+            aria-label='Previous page'
+            disabled={currentPage === 1}
+            onClick={() => goToPage(currentPage - 1)}
+          >
             <ArrowLeftSvgIcon />
-          </div>
+          </button>
         </li>
-        {/*@ts-ignore*/}
-        {paginationRange.map((pageNumber, index) => {
-          if (pageNumber === DOTS) {
-            return (
-              <li key={index} className='pagination-item dots'>
-                &#8230;
-              </li>
-            )
-          }
-
-          return (
-            <li
-              key={index}
-              style={{ cursor: 'pointer' }}
-              className={`pagination-item ${pageNumber === currentPage ? 'selected' : ''} `}
-              onClick={() => onPageChange(pageNumber)}
-            >
-              {pageNumber}
+        {pages.map((page, index) =>
+          page === DOTS ? (
+            <li key={`dots-${index}`} className='pagination-item dots' aria-hidden='true'>
+              &#8230;
             </li>
-          )
-        })}
-        <li className={`pagination-item ${currentPage === lastPage ? 'disabled' : ''}`} onClick={onNext}>
-          <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+          ) : (
+            <li key={page} className={`pagination-item ${page === currentPage ? 'selected' : ''}`}>
+              <button
+                type='button'
+                className='pagination-button'
+                aria-current={page === currentPage ? 'page' : undefined}
+                onClick={() => goToPage(page)}
+              >
+                {page}
+              </button>
+            </li>
+          ),
+        )}
+        <li className={`pagination-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+          <button
+            type='button'
+            className='pagination-button'
+            aria-label='Next page'
+            disabled={currentPage === totalPages}
+            onClick={() => goToPage(currentPage + 1)}
+          >
             <ArrowRightSvgIcon />
-          </div>
+          </button>
         </li>
       </ul>
-      <div className='G-align-center'>
-        <div>{translations?.pagination.to || 'Go to'}</div>
-        <Input
-          ref={ref}
-          onChange={handleChange}
-          onKeyDown={handleKeyPress}
-          value={val}
-          style={{
-            width: `${24 + (val.length > 3 ? val.length * 3 : 0)}px`,
-            height: '24px',
-            border: '1px solid #ACBCC3',
-            outline: 'none',
-            margin: '0 15px',
-            padding: '0 3px',
-            fontSize: '10px',
-          }}
+      <label className='G-align-center pagination-goto'>
+        <span>{goToLabel}</span>
+        <input
+          inputMode='numeric'
+          aria-label={`${goToLabel} page`}
+          value={goTo}
+          onChange={handleGoToChange}
+          onKeyDown={handleGoToKeyDown}
+          style={{ width: `${24 + (goTo.length > 3 ? goTo.length * 3 : 0)}px` }}
         />
-      </div>
-    </>
+      </label>
+    </nav>
   )
 }
 

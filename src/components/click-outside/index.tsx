@@ -1,45 +1,36 @@
-import React, { FC, useEffect } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 
 interface IClickOutSide {
-  onClickOutside(e?: MouseEvent): void
-
-  children: React.ReactNode
+  onClickOutside(event: MouseEvent): void
+  children: ReactNode
 }
 
-const ClickOutside: FC<IClickOutSide> = ({ onClickOutside, children }) => {
-  const container = React.createRef<HTMLDivElement>()
+/** True when the click happened inside a MUI dialog/popover (e.g. a date picker opened from inside this element). */
+const isInsideMuiOverlay = (target: Element | null) =>
+  Boolean(target?.closest('[role="dialog"], [role="presentation"]'))
+
+/** Calls `onClickOutside` for clicks outside its children. */
+const ClickOutside = ({ onClickOutside, children }: IClickOutSide) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  // Keep the latest callback without re-subscribing the document listener on every render.
+  const callbackRef = useRef(onClickOutside)
+  useEffect(() => {
+    callbackRef.current = onClickOutside
+  })
 
   useEffect(() => {
-    function handle(e: MouseEvent) {
-      const target = e.target as Node
-
-      const hasCommonAncestor = (element: HTMLElement, ancestorId: string): boolean => {
-        let ancestor = element.parentElement
-
-        while (ancestor) {
-          if (ancestor.id === ancestorId || ancestor.role === 'dialog' || ancestor.role === 'presentation') {
-            return true
-          }
-
-          ancestor = ancestor.parentElement
-        }
-
-        return false
-      }
-
-      if (container.current) {
-        !hasCommonAncestor(target as HTMLElement, 'alo') && onClickOutside?.(e)
-      }
+    const handle = (event: MouseEvent) => {
+      const target = event.target as Element | null
+      if (!containerRef.current || containerRef.current.contains(target)) return
+      if (isInsideMuiOverlay(target)) return
+      callbackRef.current(event)
     }
-
     document.addEventListener('click', handle, true)
-    return () => {
-      document.removeEventListener('click', handle, true)
-    }
-  }, [container, onClickOutside])
+    return () => document.removeEventListener('click', handle, true)
+  }, [])
 
   return (
-    <div className='E-click-outside' id='alo' ref={container}>
+    <div className='E-click-outside' ref={containerRef}>
       {children}
     </div>
   )

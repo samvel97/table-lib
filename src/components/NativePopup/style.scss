@@ -1,20 +1,19 @@
-.G-wrapper-button{
+.G-wrapper-button {
   position: relative;
-  
-  
-  .G-popup-button{
+
+  .G-popup-button {
     padding: 5px 10px;
     border-radius: 4px;
     margin: 0 30px;
     cursor: pointer;
-    &:hover{
-      background-color: #F6FAFD;
+    &:hover {
+      background-color: #f6fafd;
     }
-    .G-icon{
+    .G-icon {
       margin-right: 5px;
       cursor: pointer;
     }
-    .G-label{
+    .G-label {
       font-size: 14px;
       cursor: pointer;
     }
@@ -25,25 +24,26 @@
     top: -40px;
     right: 0px;
   }
-  
+
   .popup-content {
-    border:1px solid var(--color-light-100, #ECECEC);
+    border: 1px solid var(--color-light-100, #ececec);
     background: white;
     border-radius: 4px;
     max-height: calc(100vh - 50px);
     opacity: 0;
- 
 
     &.fade-in {
       animation: fadeIn 0.5s ease-in-out;
       opacity: 1;
-      border-top:1px solid var(--color-light-100, #ECECEC);
-      box-shadow: 0px 5px 5px -3px rgba(0,0,0,0.01), 0px 8px 10px 1px rgba(0,0,0,0.014), 0px 3px 14px 2px rgba(0,0,0,0.012) ;
+      border-top: 1px solid var(--color-light-100, #ececec);
+      box-shadow:
+        0px 5px 5px -3px rgba(0, 0, 0, 0.01),
+        0px 8px 10px 1px rgba(0, 0, 0, 0.014),
+        0px 3px 14px 2px rgba(0, 0, 0, 0.012);
     }
     &.fade-out {
       animation: fadeOut 0.5s ease;
       opacity: 0;
-
     }
   }
 
@@ -58,15 +58,20 @@
     color: #333;
   }
 
-
   @keyframes fadeIn {
-    from { opacity: 0}
-    to { opacity: 1}
-    
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   @keyframes fadeOut {
-    from { opacity: 1 }
-    to { opacity: 0}
-    
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
   }
 }

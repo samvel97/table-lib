@@ -1,93 +1,88 @@
 // colors
 
-$green-light           : #a6ce38;
-$green-02              : #92C643;
-$green-dark            : #8BC34A;
-$green-01              : #F2F8E1;
-$yellow                : #f5d717;
-$orange                : #FFA800;
-$orange-pie            : #FFB677;
-$pink                  : #F38CAF;
-$red                   : #FB4C4C;
-$red-dark              : rgba(255, 46, 46, 1);
-$red-error-text        : #FF4949;
-$purple                : #9253E2;
-$blue                  : #459dea;
-$blue-dark             : #6B85BF;
-$blue-light            : #80CAFF;
-$blue-base             : #292E46;
-$black                 : #000000;
-$white                 : #ffffff;
+$green-light: #a6ce38;
+$green-02: #92c643;
+$green-dark: #8bc34a;
+$green-01: #f2f8e1;
+$yellow: #f5d717;
+$orange: #ffa800;
+$orange-pie: #ffb677;
+$pink: #f38caf;
+$red: #fb4c4c;
+$red-dark: rgba(255, 46, 46, 1);
+$red-error-text: #ff4949;
+$purple: #9253e2;
+$blue: #459dea;
+$blue-dark: #6b85bf;
+$blue-light: #80caff;
+$blue-base: #292e46;
+$black: #000000;
+$white: #ffffff;
 
-$grey-base             : #2b2b2b;
-$grey-dark             : #333333;
-$grey-80               : #464646;
-$grey-70               : #696D7E;
-$grey-60               : #828282;
-$grey-61               : #B3B3B3;
-$grey-55               : #EEF0F2;
+$grey-base: #2b2b2b;
+$grey-dark: #333333;
+$grey-80: #464646;
+$grey-70: #696d7e;
+$grey-60: #828282;
+$grey-61: #b3b3b3;
+$grey-55: #eef0f2;
 
-$grey-50               : #F2F2F2;
-$grey-40               : #A9ABB5;
-$grey-30               : #BFC0C8;
-$grey-27               : #BDBDBD;
-$grey-25               : #C4C4C4;
-$grey-20               : #D4D5DA;
-$grey-10               : #EAEAED;
-$grey-07               : #F2F2F2;
-$grey-05               : #f4f5f6;
-$grey-03               : #F9F9F9;
+$grey-50: #f2f2f2;
+$grey-40: #a9abb5;
+$grey-30: #bfc0c8;
+$grey-27: #bdbdbd;
+$grey-25: #c4c4c4;
+$grey-20: #d4d5da;
+$grey-10: #eaeaed;
+$grey-07: #f2f2f2;
+$grey-05: #f4f5f6;
+$grey-03: #f9f9f9;
 
-$grey-002              : rgba(41, 46, 70, 0.02);
-$grey-main-page        : rgba(244, 245, 246, 1);
-$blue-base-opacity     : rgba(41, 46, 70, 0.6);
+$grey-002: rgba(41, 46, 70, 0.02);
+$grey-main-page: rgba(244, 245, 246, 1);
+$blue-base-opacity: rgba(41, 46, 70, 0.6);
 
-$green-rgba-15         : #F2F8E1;
-$green-rgba-10         : #F7FBEC;
-$hover-color:#F6FAFD;
-$active-color:#4844C5;
+$green-rgba-15: #f2f8e1;
+$green-rgba-10: #f7fbec;
+$hover-color: #f6fafd;
+$active-color: #4844c5;
 
-
-$orange-gradient       : linear-gradient(to left, #F5D717, #FFA800);
-$green-gradient        : linear-gradient(to right, #8BC34A, #A6CE38);
-$green-orange-gradient : linear-gradient(to right top, #8BC34A, #F5D717);
-$grey-light-gradient   : linear-gradient(to bottom, #BFC0C8, #EAEAED);
-$grey-medium-gradient  : linear-gradient(to bottom, #9496A2, #BFC0C8);
-$grey-dark-gradient    : linear-gradient(to bottom, #696D7E, #BFC0C8);
-$blue-gradient         : linear-gradient(to right, #2B4E8C, #3B65AD);
-$card-gradient         : linear-gradient(to top, #FFFFFF, #EEEFF0);
-
+$orange-gradient: linear-gradient(to left, #f5d717, #ffa800);
+$green-gradient: linear-gradient(to right, #8bc34a, #a6ce38);
+$green-orange-gradient: linear-gradient(to right top, #8bc34a, #f5d717);
+$grey-light-gradient: linear-gradient(to bottom, #bfc0c8, #eaeaed);
+$grey-medium-gradient: linear-gradient(to bottom, #9496a2, #bfc0c8);
+$grey-dark-gradient: linear-gradient(to bottom, #696d7e, #bfc0c8);
+$blue-gradient: linear-gradient(to right, #2b4e8c, #3b65ad);
+$card-gradient: linear-gradient(to top, #ffffff, #eeeff0);
 
 // Font sizes
 
-$font-size-8           : 8px;
-$font-size-10          : 10px;
-$font-size-12          : 12px;
-$font-size-13          : 13px;
-$font-size-14          : 14px;
-$font-size-15          : 15px;
-$font-size-16          : 16px;
-$font-size-17          : 17px;
-$font-size-18          : 18px;
-$font-size-20          : 20px;
-$font-size-22          : 22px;
-$font-size-24          : 24px;
-$font-size-26          : 26px;
-$font-size-28          : 28px;
-$font-size-30          : 30px;
-$font-size-32          : 32px;
-$font-size-40          : 40px;
-$font-size-48          : 48px;
-
+$font-size-8: 8px;
+$font-size-10: 10px;
+$font-size-12: 12px;
+$font-size-13: 13px;
+$font-size-14: 14px;
+$font-size-15: 15px;
+$font-size-16: 16px;
+$font-size-17: 17px;
+$font-size-18: 18px;
+$font-size-20: 20px;
+$font-size-22: 22px;
+$font-size-24: 24px;
+$font-size-26: 26px;
+$font-size-28: 28px;
+$font-size-30: 30px;
+$font-size-32: 32px;
+$font-size-40: 40px;
+$font-size-48: 48px;
 
 //page withs
 
-$max-width-1600        : 1600px;
-$max-width-1200        : 1200px;
-$max-width-991         : 991px;
-$max-width-767         : 767px;
+$max-width-1600: 1600px;
+$max-width-1200: 1200px;
+$max-width-991: 991px;
+$max-width-767: 767px;
 
 // transitions
-$transition            : 0.3s;
-
-
+$transition: 0.3s;

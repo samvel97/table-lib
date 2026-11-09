@@ -1,10 +1,10 @@
 import { Button } from '@mui/material'
 import React, { Fragment, memo, useState } from 'react'
-import { IComparisonType, IFiltersTypes, ISelect, ItemFields } from '../../../Models/table.models'
+import { type IComparisonType, type IFiltersTypes, type ISelect, type ItemFields } from '../../../Models/table.models'
 import NativePopup from '../../../components/NativePopup/NativePopup'
 import FilterSvgIcon from '../../../svgIcons/FilterSvgIcon'
 import APIFilter from './FiltersPerColumn/apiFilter'
-import { ColumnTypeEnums } from '../../../Models/table.enum'
+import { type ColumnTypeEnums } from '../../../Models/table.enum'
 
 interface IFilter {
   data?: any
@@ -24,9 +24,7 @@ interface IFilter {
 const Filter = ({
   data,
   filterColumns,
-  perColumnListForFilters,
   filterDataForRequest,
-  isLoadingFilters,
   filtersTypes,
   perColumnTotalCount,
   translations,
@@ -74,9 +72,11 @@ const Filter = ({
         updatedRow.push(option)
       }
     }
-    !isOpened
-      ? getFilteredDataWithDebounce?.(updatedRow, ColumnName, columnType)
-      : getFilter?.(updatedRow, ColumnName, columnType)
+    if (isOpened) {
+      getFilter?.(updatedRow, ColumnName, columnType)
+    } else {
+      getFilteredDataWithDebounce?.(updatedRow, ColumnName, columnType)
+    }
     setCollectedData(updatedRow)
   }
 

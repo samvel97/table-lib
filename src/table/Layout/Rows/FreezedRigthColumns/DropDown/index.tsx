@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { ILinksList } from '../../../../../Models/table.models'
+import { type ILinksList } from '../../../../../Models/table.models'
 import PopUp from '../../../../../components/popUp'
 import LinkSvgIcon from '../../../../../svgIcons/LinkSvgIcon'
 import './style.scss'
-interface IDropDown<T extends Object> {
+interface IDropDown<T extends object> {
   item: T
   checkedLink?: T
   links?: ILinksList[]
@@ -11,7 +11,7 @@ interface IDropDown<T extends Object> {
   getRowForDropdown?(option: any): void
 }
 
-const DropDown = <T extends Object>({ checkedLink, links, item, RightSideIcon, getRowForDropdown }: IDropDown<T>) => {
+const DropDown = <T extends object>({ checkedLink, links, item, RightSideIcon, getRowForDropdown }: IDropDown<T>) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

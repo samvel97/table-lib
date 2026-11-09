@@ -1,12 +1,12 @@
 import React from 'react'
 import { StructureConfig } from '../../../../../Models/table.enum'
 import {
-  IColumnConfigStructure,
-  IColumnHeaderStructure,
-  IColumnTotalStructure,
+  type IColumnConfigStructure,
+  type IColumnHeaderStructure,
+  type IColumnTotalStructure,
 } from '../../../../../Models/table.models'
 
-interface IFreezedHeader<T extends Object> {
+interface IFreezedHeader<T extends object> {
   columnsHeaderStructure: IColumnHeaderStructure
   columnsConfigStructure: IColumnConfigStructure<T>
   columnTotalStructures?: IColumnTotalStructure
@@ -14,7 +14,7 @@ interface IFreezedHeader<T extends Object> {
   headerColor?: string
   handleSorting?(option: string): void
 }
-const FreezedItem = <T extends Object>({
+const FreezedItem = <T extends object>({
   columnsHeaderStructure,
   columnsConfigStructure,
   columnMinWidth,
@@ -24,7 +24,6 @@ const FreezedItem = <T extends Object>({
   return (
     <>
       {columnsHeaderStructure[StructureConfig.Freezed].items.map((item, index) =>
-        //@ts-ignore
         columnsConfigStructure[StructureConfig.Freezed].items.map((column, indexx) => {
           if (index === indexx) {
             return (

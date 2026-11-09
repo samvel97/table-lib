@@ -1,17 +1,18 @@
+import { type RowId } from '../../../../utils/rowId'
 import React from 'react'
-import { ILinksList } from '../../../../Models/table.models'
+import { type ILinksList } from '../../../../Models/table.models'
 import DropDown from './DropDown'
 import SelfAction from './SelfAction'
-interface IFreezedRightColumns<T extends Object> {
+interface IFreezedRightColumns<T extends object> {
   item: T
   checkedLink?: T
   links?: ILinksList[]
   freezedRightSide?: string
   RightSideIcon?: any
   RightSideSelfAction?: (option: number | string) => void
-  getRowForDropdown(option: number): void
+  getRowForDropdown(id: RowId): void
 }
-const FreezedRightColumns = <T extends Object>({
+const FreezedRightColumns = <T extends object>({
   item,
   checkedLink,
   links,

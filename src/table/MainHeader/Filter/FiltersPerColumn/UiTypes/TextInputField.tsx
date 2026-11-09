@@ -1,8 +1,9 @@
+import { useSyncOnChange } from '../../../../../utils/useSyncOnChange'
 import React from 'react'
 import { TextField } from '@mui/material'
-import { ColumnTypeEnums, inputSize } from '../../../../../Models/table.enum'
-import { IComparisonType, ItemFields } from '../../../../../Models/table.models'
-import { useEffect, useState } from 'react'
+import { ColumnTypeEnums, type inputSize } from '../../../../../Models/table.enum'
+import { type IComparisonType, type ItemFields } from '../../../../../Models/table.models'
+import { useState } from 'react'
 import { containsOnlyNumbers } from '../../../../../utils'
 interface IMultipleCHeck {
   item: IComparisonType
@@ -66,15 +67,14 @@ const TextInputField = ({
     }
     return ''
   }
-  useEffect(() => {
-    if (item.ColumnName === filterTyping.PropertyName) {
-      let newValues: string[] = filterTyping.Values
-      if (item.ColumnType !== ColumnTypeEnums.Text) {
-        newValues = filterTyping.Values.map((item: number) => item + '')
-      }
-      newValues[0] && setValue(newValues[0])
+  // Show the applied filter value when the filter changes.
+  useSyncOnChange(filterTyping, (filter) => {
+    if (item.ColumnName !== filter.PropertyName) return
+    const first = filter.Values[0]
+    if (first !== undefined && first !== null && first !== '') {
+      setValue(item.ColumnType === ColumnTypeEnums.Text ? first : String(first))
     }
-  }, [filterTyping])
+  })
 
   return (
     <TextField

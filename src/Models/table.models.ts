@@ -1,69 +1,136 @@
-import { ReactNode } from 'react'
-import { ColumnTypeEnums } from './table.enum'
+import type { ComponentType, MemoExoticComponent, ReactElement, ReactNode, SVGProps } from 'react'
 
-export interface IProps<T extends Object> {
+import { type ColumnTypeEnums } from './table.enum'
+
+/** SVG icon component, e.g. an imported icon or `memo((props) => <svg {...props} />)`. */
+export type TableIcon =
+  ComponentType<SVGProps<SVGSVGElement>> | MemoExoticComponent<(props: SVGProps<SVGSVGElement>) => ReactElement>
+
+/** Props of `<Table>`. Rows must have a unique `id`. */
+export interface IProps<T extends object> {
+  // ── Data ────────────────────────────────────────────────────────────────
+  /** Rows of the current page. Each row needs a unique `id`. */
   data: T[]
+  /** Column definitions (`Main` and pinned `Freezed` lists). Index `i` matches `columnsHeaderStructure`. */
   columnsConfigStructure: IColumnConfigStructure<T>
+  /** Column headers, in the same order as `columnsConfigStructure`. */
   columnsHeaderStructure: IColumnHeaderStructure
-  rightFreezeConfig?: IColumnConfig<T>[]
-  perColumnListForFilters?: (string | ISelect)[]
-  links?: ILinksList[]
-  rowActions?: IrowActions[]
+  /** Shows skeleton rows while `data` is empty. */
+  isLoadedData?: boolean
+  /** Rendered when there are no rows. */
+  EmptyDataContainer?: ReactNode
+  /** UI texts (checkbox, filters, pagination, customization, download). See the README for the shape. */
+  translations?: Record<string, any>
+
+  // ── Pagination ──────────────────────────────────────────────────────────
+  /** Page-size options shown in the footer select. */
   pageSizeStructure?: IPageSizes[]
+  /** Total number of rows across all pages (despite the name). The footer is hidden when it is 0. */
   pagesTotalCount?: number
   currentPage?: number
-  selectedPageCount?: ISelected
+  /** Currently selected page size, matched by `id` against `pageSizeStructure`. */
+  selectedPageSizeId?: ISelected
+  getPageRowsCountAndCurrentPage?(pageNumber: number, rowsCount: IPageSizes): void
+
+  // ── Selection and row actions ───────────────────────────────────────────
+  /** Checkbox column plus the "select visible / all / none" menu. */
   multipleCheck?: boolean
+  /** Keeps the checkbox column sticky on the left. */
   isStickyFirstColumn?: boolean
+  /** Shows `rowActions` (and the freeze button) when a row is hovered. */
   isHoveredRow?: boolean
-  draggableColumns?: boolean
+  /** Up to three icon actions shown on hover; the defaults are edit and delete icons. */
+  rowActions?: IrowActions[]
+  /** Shows the "freeze row" button on hover (up to three rows can be frozen to the top). */
+  rowsFreezeAction?: boolean
+  FreezeIcon?: TableIcon
+  /** Called when a row is clicked. */
+  getRow?(option: T): void
+  handleEdit?: (option: T) => void
+  /** Receives the checked rows. */
+  handleDelete?: (option: T[] | string) => void
+  /** Custom element in the selection toolbar; receives the checked rows. */
+  customHeaderAction?(option: T[] | string): ReactElement
+  /** Static element always shown in the toolbar. */
+  staticAction?(): ReactElement
+
+  // ── Right side column ───────────────────────────────────────────────────
+  /** Shows the sticky column on the right. */
   freezedRightSideVisible?: boolean
-  FreezeIcon?: React.MemoExoticComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
+  /** `'dropdown'` shows the `links` menu; anything else calls `RightSideSelfAction(row)`. */
+  freezedRightSide?: string
+  /** Custom cells for the right sticky column (up to four). */
+  rightFreezeConfig?: IColumnConfig<T>[]
+  /** Menu items for `freezedRightSide='dropdown'`. */
+  links?: ILinksList[]
+  RightSideIcon?: TableIcon
+  RightSideSelfAction?: (option: any) => void
+
+  // ── Columns ─────────────────────────────────────────────────────────────
+  /** Enables the "Customize columns" popup (show/hide, reorder, pin up to three). */
+  draggableColumns?: boolean
+  setColumnsConfigStructure?(option: IColumnConfigStructure<T>): void
+  setColumnHeaderStructure?(options: IColumnHeaderStructure): void
+  /** Called by the customization popup's Save button (e.g. to persist the layout). */
+  storeStructure?(): void
+  /** Maximum cell width in px when a column has no `width`. */
+  columnMinWidth?: number
+  /** Header titles receive `handleSorting`; call it with the column key to sort. */
+  hasOrdering?: boolean
+  handleSorting?(option: string): void
+
+  // ── Filters ─────────────────────────────────────────────────────────────
+  /** Shows the filters panel. */
+  hasFilters?: boolean
+  /** Filterable columns. Put loaded values in `options` (see README). */
+  filterColumns?: IComparisonType[]
+  /** Filter operators available per column type. */
+  filtersTypes?: IFiltersTypes[]
+  /** Currently applied filters (controlled). */
+  filterDataForRequest?: ItemFields[]
+  /** Number of values returned by the last "load values" request for the open column. */
+  perColumnTotalCount?: number
+  /** Request values for a column (called when a filter field opens or changes). */
+  getFilteredData?(option: ItemFields[], ColumnName: string, columnType?: ColumnTypeEnums): void
+  getFilteredDataWithDebounce?(option: ItemFields[], ColumnName: string, columnType: ColumnTypeEnums): void
+  /** Apply filters to the table data. */
+  getFilteredDataForTable?(option: ItemFields[]): void
+  /** "Load more" values for the open filter column. */
+  handleChangePagePerFilterField?(option: ItemFields): void
+
+  // ── Totals footer ───────────────────────────────────────────────────────
+  /** Shows the footer row rendered by each column's `footer`. */
+  isEnableAggregates?: boolean
+  aggregates?: any
+  handleArgChange?(columnName: string, type: string): void
+
+  // ── Toolbar ─────────────────────────────────────────────────────────────
+  /** Shows the download menu; receives 'XLSX' | 'CSV' and the checked rows, or 'All' when every row is selected. */
+  getDownloadType?: (option: string, checkedRows: T[] | string) => void
+
+  // ── Appearance ──────────────────────────────────────────────────────────
   headerColor?: string
   footerColor?: string
   freezedLeftSideColor?: string
   freezedRightSideColor?: string
-  freezedRightSide?: string
-  columnMinWidth?: number
   headerHeight?: number
   footerHeight?: number
   leftFreezedColumnWidth?: number
   rightFreezedColumnWidth?: number
-  RightSideIcon?: React.MemoExoticComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
-  filterColumns?: IComparisonType[]
-  filtersTypes?: IFiltersTypes[]
-  filterDataForRequest?: ItemFields[]
+
+  // ── Deprecated (accepted for compatibility, no effect) ──────────────────
+  /** @deprecated Ignored (also in 7.8.2). Pass values in `filterColumns[i].options` instead. */
+  perColumnListForFilters?: (string | ISelect)[]
+  /** @deprecated Ignored (also in 7.8.2). Use `filterColumns[i].isLoading` instead. */
   isLoadingFilters?: boolean
-  rowsFreezeAction?: boolean
-  isEnableAggregates?: boolean
-  aggregates?: any
-  EmptyDataContainer?: ReactNode
-  perColumnTotalCount?: number
+  /** @deprecated Not used by the table. */
+  selectedPageCount?: ISelected
+  /** @deprecated Not used by the table. */
   hoverdRowPosition?: number
-  selectedPageSizeId?: ISelected
-  hasFilters?: boolean
-  isLoadedData?: boolean
-  translations?: Record<string, any>
-  hasOrdering?: boolean
-  getRow?(option: T): void
-  RightSideSelfAction?: (option: any) => void
-  handleEdit?: (option: T) => void
-  handleDelete?: (option: T[] | string) => void
-  setColumnsConfigStructure?(option: IColumnConfigStructure<T>): void
-  setColumnHeaderStructure?(options: IColumnHeaderStructure): void
+  /** @deprecated Not used by the table. */
   setSortedData?(option: any): void
-  storeStructure?(): void
-  getPageRowsCountAndCurrentPage?(pageNumber: number, rowsCount: IPageSizes): void
-  getFilteredData?(option: ItemFields[], ColumnName: string, columnType?: ColumnTypeEnums): void
-  getFilteredDataWithDebounce?(option: ItemFields[], ColumnName: string, columnType: ColumnTypeEnums): void
-  getFilteredDataForTable?(option: ItemFields[]): void
-  handleChangePagePerFilterField?(option: ItemFields): void
-  getDownloadType?: (option: string, checkedRows: T[] | string) => void
-  customHeaderAction?(option: T[] | string): JSX.Element
-  handleSorting?(option: string): void
-  handleArgChange?(columnName: string, type: string): void
+  /** @deprecated Not used by the table. */
   handleDeleteAll?: () => void
-  staticAction?(): JSX.Element
 }
 
 export interface ItemFields {
@@ -96,7 +163,7 @@ export interface IColumnTotal {
   title: number | null
 }
 
-export interface IColumns<T extends Object> {
+export interface IColumns<T extends object> {
   name: string
   items: IColumnConfig<T>[]
 }
@@ -109,7 +176,7 @@ export interface ITotals {
   items: IColumnTotal[]
 }
 
-export interface IColumnConfigStructure<T extends Object> {
+export interface IColumnConfigStructure<T extends object> {
   Main: IColumns<T>
   Freezed: IColumns<T>
 }
@@ -127,7 +194,7 @@ export interface ITotalList {
   title: string
 }
 
-export interface IFreezeProps<T extends Object> {
+export interface IFreezeProps<T extends object> {
   columnsConfigStructure: IColumnConfigStructure<T>
   columnMinWidth?: number
   item: T
@@ -147,14 +214,14 @@ export interface IComparisonType {
 // export interface ITranslations {
 //   EmptyData:
 // }
-export interface IColumnConfig<T extends Object> {
+export interface IColumnConfig<T extends object> {
   id?: string | number
   columnName?: number | string
   title: any
   setRow: (data?: T, isLoadingData?: boolean) => any
   footer?: any
   isVisible: boolean
-  customStyle?: Object
+  customStyle?: object
   totalObject?: {
     valueKey: string
     isPrice: boolean
@@ -188,7 +255,7 @@ export interface IColumn {
 
 export interface IrowActions {
   icon?: () => string | number | HTMLElement | React.ReactNode | null | any
-  action: (e: any, item: Object, index: number) => void
+  action: (e: any, item: object, index: number) => void
 }
 
 export interface ILinksList {

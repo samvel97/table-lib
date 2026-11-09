@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { SVGProps, memo } from 'react'
+import { type SVGProps, memo } from 'react'
 const SvgComponent = (props: SVGProps<SVGSVGElement>) => (
   <svg xmlns='http://www.w3.org/2000/svg' width={32} height={32} fill='none' {...props}>
     <path fill='#E3EBEF' stroke='#4A4C56' strokeWidth={1.5} d='M3.99 6.927h8.16v6.55H3.99z' />

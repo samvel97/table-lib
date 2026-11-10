@@ -5,6 +5,7 @@ import Header from './Layout/Header'
 import Rows from './Layout/Rows'
 import MainFooter from './MainFooter'
 import MainHeader from './MainHeader'
+import '../styles/index.scss'
 import './index.scss'
 import useTable from './useTable'
 import { TableLayoutContext, useTableLayoutState } from './layoutContext'
@@ -23,7 +24,6 @@ function Table<T extends object>({
   pageSizeStructure,
   pagesTotalCount,
   currentPage,
-  selectedPageCount,
   multipleCheck,
   isStickyFirstColumn,
   columnMinWidth,
@@ -75,7 +75,6 @@ function Table<T extends object>({
   customHeaderAction,
   handleSorting,
   handleArgChange,
-  handleDeleteAll,
   staticAction,
 }: IProps<T>) {
   const {
@@ -115,15 +114,12 @@ function Table<T extends object>({
           <MainHeader
             columnsConfigStructure={columnsConfigStructure}
             columnsHeaderStructure={columnsHeaderStructure}
-            // perColumnListForFilters={perColumnListForFilters}
-            selectedPageCount={selectedPageCount}
             multipleCheck={multipleCheck}
             data={data}
             checkedRows={checkedRows}
             draggableColumns={draggableColumns}
             filterColumns={filterColumns}
             filterDataForRequest={filterDataForRequest}
-            // isLoadingFilters={isLoadingFilters}
             filtersTypes={filtersTypes}
             selectedType={selectedType}
             perColumnTotalCount={perColumnTotalCount}
@@ -143,7 +139,6 @@ function Table<T extends object>({
             handleChangePagePerFilterField={handleChangePagePerFilterField}
             getDownloadType={getDownloadType}
             customHeaderAction={customHeaderAction}
-            handleDeleteAll={handleDeleteAll}
             staticAction={staticAction}
           />
         ) : null}
@@ -205,7 +200,6 @@ function Table<T extends object>({
                 hasOrdering={hasOrdering}
                 isLoadedData={isLoadedData}
                 getRow={getRow}
-                RightSideSelfAction={RightSideSelfAction}
                 freezeRow={freezeRow}
                 getRowForDropdown={getRowForDropdown}
                 isCheckedRows={isCheckedRows}
@@ -245,16 +239,14 @@ function Table<T extends object>({
           </>
         </div>
         {data.length && currentPage && pagesTotalCount && selectedPageSizeId ? (
-          <div className='G-justify-end G-align-center' style={{ padding: '30px 10px 10px 10px' }}>
-            <MainFooter
-              translations={translations}
-              pageSizeStructure={pageSizeStructure}
-              currPage={currentPage}
-              pagesTotalCount={pagesTotalCount}
-              selectedPageSizeId={selectedPageSizeId}
-              getPageRowsCountAndCurrentPage={getPageRowsCountAndCurrentPage}
-            />
-          </div>
+          <MainFooter
+            translations={translations}
+            pageSizeStructure={pageSizeStructure}
+            currPage={currentPage}
+            pagesTotalCount={pagesTotalCount}
+            selectedPageSizeId={selectedPageSizeId}
+            getPageRowsCountAndCurrentPage={getPageRowsCountAndCurrentPage}
+          />
         ) : null}
       </div>
     </TableLayoutContext.Provider>

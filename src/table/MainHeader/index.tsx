@@ -1,49 +1,39 @@
 import type { ReactElement } from 'react'
-import React from 'react'
-import ColumnsCustomizer from './ColumnsCustomizer'
+import { Pencil, Trash } from 'lucide-react'
+import { Button } from '../../ui/Button'
 import {
   type IColumnConfigStructure,
   type IColumnHeaderStructure,
-  type IColumnTotalStructure,
   type IComparisonType,
   type IFiltersTypes,
-  type IPageSizes,
-  type ISelect,
-  type ISelected,
   type ItemFields,
 } from '../../Models/table.models'
-import CheckRows from './CheckRows'
-import DeleteSvgIcon from '../../svgIcons/DeleteSvgIcon'
-import EditSvgIcon from '../../svgIcons/EditSvgIcon'
-import Filter from './Filter'
-import Download from './Download'
 import { CheckedItems, type ColumnTypeEnums } from '../../Models/table.enum'
+import CheckRows from './CheckRows'
+import ColumnsCustomizer from './ColumnsCustomizer'
+import Download from './Download'
+import Filter from './Filter'
 import './style.scss'
+
 interface IActionsHeader<T extends object> {
   columnsConfigStructure: IColumnConfigStructure<T>
   columnsHeaderStructure: IColumnHeaderStructure
-  selectedPageCount?: ISelected
   multipleCheck?: boolean
   data: T[]
   checkedRows: T[]
   draggableColumns?: boolean
   filterColumns?: IComparisonType[]
   filterDataForRequest?: ItemFields[]
-  isLoadingFilters?: boolean
   filtersTypes?: IFiltersTypes[]
   selectedType: string
   perColumnTotalCount?: number
   hasFilters?: boolean
   translations?: Record<string, any>
-  perColumnListForFilters?: (string | ISelect)[]
-  setColumnTotalStructures?(option: IColumnTotalStructure): void
   handleCheckAll(data?: T[]): void
   setColumnsConfigStructure?: (option: IColumnConfigStructure<T>) => void
   setColumnHeaderStructure?: (options: IColumnHeaderStructure) => void
-  handleChangePage?(option: number): void
   handleEdit?(option: T): void
   handleDelete?(option: T[]): void
-  handleSelectDataSize?(options: IPageSizes): void
   storeStructure?(): void
   unCheck(): void
   checkAllDataFromDb(): void
@@ -53,9 +43,10 @@ interface IActionsHeader<T extends object> {
   handleChangePagePerFilterField?(option: ItemFields): void
   getDownloadType?: (option: string, checkedRows: T[] | string) => void
   customHeaderAction?(option: T[] | string): ReactElement
-  handleDeleteAll?: () => void
   staticAction?(): ReactElement
 }
+
+/** Toolbar above the table: selection and bulk actions on the left, columns, filters and download on the right. */
 const MainHeader = <T extends object>({
   columnsConfigStructure,
   columnsHeaderStructure,
@@ -86,60 +77,36 @@ const MainHeader = <T extends object>({
   customHeaderAction,
   staticAction,
 }: IActionsHeader<T>) => {
+  const hasSelection = selectedType === CheckedItems.SELECTED_ALL || checkedRows.length > 0
+
   return (
-    <div className='G-justify-start G-table-actions-header'>
-      {multipleCheck ? (
-        <>
-          <CheckRows
-            data={data}
-            checkedRows={checkedRows}
-            translations={translations}
-            handleCheckAll={handleCheckAll}
-            unCheck={unCheck}
-            checkAllDataFromDb={checkAllDataFromDb}
-          />
-          <div className='G-center G-actions'>
-            {checkedRows.length == 1 && handleEdit ? (
-              <div className='G-flex G-edit' onClick={() => handleEdit(checkedRows[0])}>
-                <div className='G-center G-edit-icon'>
-                  <EditSvgIcon />
-                  <span>{translations?.editAction || 'Edit'}</span>
-                </div>
-              </div>
+    <div className='brt-toolbar' role='toolbar' aria-label='Table actions'>
+      <div className='brt-toolbar__group'>
+        {multipleCheck ? (
+          <>
+            <CheckRows
+              data={data}
+              checkedRows={checkedRows}
+              translations={translations}
+              handleCheckAll={handleCheckAll}
+              unCheck={unCheck}
+              checkAllDataFromDb={checkAllDataFromDb}
+            />
+            {checkedRows.length === 1 && handleEdit ? (
+              <Button size='small' onClick={() => handleEdit(checkedRows[0])}>
+                <Pencil size={15} aria-hidden='true' />
+                {translations?.editAction || 'Edit'}
+              </Button>
             ) : null}
-            {(selectedType === CheckedItems.SELECTED_ALL || checkedRows.length) && handleDelete ? (
-              <div className='G-flex G-delete' onClick={() => handleDelete(checkedRows)}>
-                <div className='G-center G-delete-icon'>
-                  <DeleteSvgIcon />
-                  <span>{translations?.deleteAction || 'Delete'}</span>
-                </div>
-              </div>
+            {hasSelection && handleDelete ? (
+              <Button size='small' className='brt-button--danger' onClick={() => handleDelete(checkedRows)}>
+                <Trash size={15} aria-hidden='true' />
+                {translations?.deleteAction || 'Delete'}
+              </Button>
             ) : null}
-            {/* {selectedType === CheckedItems.SELECTED_ALL || checkedRows.length
-              ? customHeaderAction?.(checkedRows)
-              : null} */}
-            {selectedType === CheckedItems.SELECTED_ALL || checkedRows.length
-              ? customHeaderAction?.(checkedRows)
-              : null}
-            {/* {handleDeleteAll && data.length > 1 && (
-              <div className="G-flex G-delete" onClick={handleDeleteAll}>
-                <div className="G-center G-delete-icon">
-                  <DeleteSvgIcon />
-                  <span>{translations?.deleteAllAction || "Delete All"}</span>
-                </div>
-              </div>
-            )} */}
-          </div>
-        </>
-      ) : null}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '32px',
-          flex: '1 1 auto',
-        }}
-      >
+            {hasSelection ? customHeaderAction?.(checkedRows) : null}
+          </>
+        ) : null}
         {draggableColumns ? (
           <ColumnsCustomizer
             columnsConfigStructure={columnsConfigStructure}
@@ -152,33 +119,30 @@ const MainHeader = <T extends object>({
         ) : null}
         {staticAction?.()}
       </div>
-
-      {hasFilters ? (
-        <Filter
-          data={data}
-          filterColumns={filterColumns}
-          // perColumnListForFilters={perColumnListForFilters}
-          filterDataForRequest={filterDataForRequest}
-          // isLoadingFilters={isLoadingFilters}
-          filtersTypes={filtersTypes}
-          perColumnTotalCount={perColumnTotalCount}
-          translations={translations}
-          getFilteredDataWithDebounce={getFilteredDataWithDebounce}
-          getFilter={getFilteredData}
-          getFilteredDataForTable={getFilteredDataForTable}
-          handleChangePagePerFilterField={handleChangePagePerFilterField}
-        />
-      ) : null}
-      {getDownloadType ? (
-        <div className='G-center G-download'>
+      <div className='brt-toolbar__group'>
+        {hasFilters ? (
+          <Filter
+            data={data}
+            filterColumns={filterColumns}
+            filterDataForRequest={filterDataForRequest}
+            filtersTypes={filtersTypes}
+            perColumnTotalCount={perColumnTotalCount}
+            translations={translations}
+            getFilteredDataWithDebounce={getFilteredDataWithDebounce}
+            getFilter={getFilteredData}
+            getFilteredDataForTable={getFilteredDataForTable}
+            handleChangePagePerFilterField={handleChangePagePerFilterField}
+          />
+        ) : null}
+        {getDownloadType ? (
           <Download
             selectedType={selectedType}
             checkedRows={checkedRows}
             translations={translations}
             getDownloadType={getDownloadType}
           />
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   )
 }

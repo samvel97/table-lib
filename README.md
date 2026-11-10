@@ -34,7 +34,8 @@ npm install beautiful-react-table
 ```
 
 The only peer dependencies are `react` and `react-dom` (`^18 || ^19`). Drag and drop (`@hello-pangea/dnd`),
-menu positioning (`@floating-ui/react`) and virtualization (`@tanstack/react-virtual`) are installed automatically.
+menu positioning (`@floating-ui/react`), virtualization (`@tanstack/react-virtual`) and icons (`lucide-react`) are
+installed automatically.
 No UI framework is needed; MUI is not required (apps that use MUI can keep it).
 Styles are imported by the package itself; no CSS import is needed.
 

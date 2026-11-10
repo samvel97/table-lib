@@ -1,4 +1,3 @@
-import React from 'react'
 import { type IColumnConfig } from '../../../../Models/table.models'
 const FooterFreezedRight = <T extends object>({
   footerColor,

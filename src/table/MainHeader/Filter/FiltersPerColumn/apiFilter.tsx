@@ -104,7 +104,6 @@ const APIFilter = ({
   }
 
   const handleChangeRange = (from: string, to: string) => {
-    // Work on a copy: mutating the state object hid changes from React and from the consumer.
     const columnFilter: ItemFields = { ...filterTyping, Values: [...filterTyping.Values] }
     checkIsDisabled(false)
 
@@ -124,7 +123,6 @@ const APIFilter = ({
   }
 
   const handleChangeValueSingleInputs = (value: any) => {
-    // Work on a copy: mutating the state object hid changes from React and from the consumer.
     const columnFilter: ItemFields = { ...filterTyping, Values: [...filterTyping.Values] }
 
     if (value === 'invalid' && item.ColumnType === ColumnTypeEnums.Date) {

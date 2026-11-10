@@ -1,5 +1,3 @@
-import './styles/index.scss'
-
 export { default as Table } from './table'
 
 export { StructureConfig, ColumnTypeEnums, ConditionalOperatorsEnums, CheckedItems } from './Models/table.enum'

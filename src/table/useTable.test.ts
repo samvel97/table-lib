@@ -99,4 +99,15 @@ describe('useTable: checking rows', () => {
     expect(result.current.checkedRows).toHaveLength(0)
     expect(ids(result.current.unFreezedRows)).toEqual([1, 2])
   })
+
+  it('keeps frozen rows out of the regular list when new data arrives', () => {
+    const { result, rerender } = setup()
+    act(() => result.current.freezeRow(click, 1))
+    rerender({ data: [...rows] })
+    expect(ids(result.current.freezedRows)).toEqual([2])
+    expect(ids(result.current.unFreezedRows)).toEqual([1, 3, 4, 5])
+    rerender({ data: rows.slice(2) })
+    expect(result.current.freezedRows).toHaveLength(0)
+    expect(ids(result.current.unFreezedRows)).toEqual([3, 4, 5])
+  })
 })

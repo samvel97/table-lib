@@ -82,7 +82,6 @@ const MultipleSelectCheckmarks = ({
         inputValue={inputValue}
         onInputChange={setInputValue}
         options={options}
-        // Numeric names were rendered as "[object Object]" in v7.
         getOptionLabel={(option) => String(option.name)}
         isSelected={isSelected}
         onToggle={(option) =>

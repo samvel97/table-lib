@@ -141,7 +141,6 @@ export const validateRangeColumns = (
   setErrorMessage: (option: { from: string; to: string }) => void,
   messages?: Partial<RangeValidationMessages>,
 ) => {
-  // Without translations, the old code threw "Cannot read properties of undefined".
   const errMessages = { ...DEFAULT_RANGE_MESSAGES, ...messages }
   let isValid = false
   const columnError = { from: '', to: '' }

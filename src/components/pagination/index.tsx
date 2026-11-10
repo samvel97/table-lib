@@ -1,6 +1,5 @@
 import { useState, type ChangeEvent, type KeyboardEvent } from 'react'
-import ArrowLeftSvgIcon from '../../svgIcons/ArrowLeftSvgIcon'
-import ArrowRightSvgIcon from '../../svgIcons/ArrowRightSvgIcon'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { DOTS, usePagination } from './usePagination'
 import './style.scss'
 
@@ -55,29 +54,29 @@ const Pagination = ({
   const goToLabel = translations?.pagination?.to || 'Go to'
 
   return (
-    <nav className='G-flex G-align-center' aria-label='Pagination'>
-      <ul className={`pagination-container ${className} G-flex G-align-center G-justify-between`}>
-        <li className={`pagination-item ${currentPage === 1 ? 'disabled' : ''}`}>
+    <nav className={`brt-pagination ${className}`} aria-label='Pagination'>
+      <ul className='brt-pagination__pages'>
+        <li>
           <button
             type='button'
-            className='pagination-button'
+            className='brt-pagination__button'
             aria-label='Previous page'
             disabled={currentPage === 1}
             onClick={() => goToPage(currentPage - 1)}
           >
-            <ArrowLeftSvgIcon />
+            <ChevronLeft size={16} />
           </button>
         </li>
         {pages.map((page, index) =>
           page === DOTS ? (
-            <li key={`dots-${index}`} className='pagination-item dots' aria-hidden='true'>
+            <li key={`dots-${index}`} className='brt-pagination__dots' aria-hidden='true'>
               &#8230;
             </li>
           ) : (
-            <li key={page} className={`pagination-item ${page === currentPage ? 'selected' : ''}`}>
+            <li key={page}>
               <button
                 type='button'
-                className='pagination-button'
+                className='brt-pagination__button'
                 aria-current={page === currentPage ? 'page' : undefined}
                 onClick={() => goToPage(page)}
               >
@@ -86,19 +85,19 @@ const Pagination = ({
             </li>
           ),
         )}
-        <li className={`pagination-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+        <li>
           <button
             type='button'
-            className='pagination-button'
+            className='brt-pagination__button'
             aria-label='Next page'
             disabled={currentPage === totalPages}
             onClick={() => goToPage(currentPage + 1)}
           >
-            <ArrowRightSvgIcon />
+            <ChevronRight size={16} />
           </button>
         </li>
       </ul>
-      <label className='G-align-center pagination-goto'>
+      <label className='brt-pagination__goto'>
         <span>{goToLabel}</span>
         <input
           inputMode='numeric'
@@ -106,7 +105,8 @@ const Pagination = ({
           value={goTo}
           onChange={handleGoToChange}
           onKeyDown={handleGoToKeyDown}
-          style={{ width: `${24 + (goTo.length > 3 ? goTo.length * 3 : 0)}px` }}
+          className='brt-pagination__goto-input'
+          style={{ width: `${Math.max(3, goTo.length + 1)}ch` }}
         />
       </label>
     </nav>

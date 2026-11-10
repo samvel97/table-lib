@@ -1,9 +1,11 @@
-import React, { memo, useState } from 'react'
+import { memo, useState, type MouseEvent, type ReactElement } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { CheckedItems } from '../../../Models/table.enum'
 import Checkbox from '../../../components/checkbox'
 import PopUp from '../../../components/popUp'
-import DropdownSvgIcon from '../../../svgIcons/DropdownSvgIcon'
-import './style.scss'
+
+type Selection = 'all' | 'visible' | 'none'
+
 interface ICheckRows<T extends object> {
   data: T[]
   checkedRows: T[]
@@ -11,19 +13,9 @@ interface ICheckRows<T extends object> {
   handleCheckAll(data?: T[]): void
   unCheck(): void
   checkAllDataFromDb(): void
-  handleClose?: () => void
 }
-const dropdownStyle = {
-  height: '26px',
-  display: 'flex',
-  justifyContent: 'start',
-  padding: 0,
-  margin: 0,
-  translate: -10,
-  backgroundColor: 'white',
-  minWidth: 10,
-  border: 'none',
-}
+
+/** Select-all checkbox with a menu: all rows, visible rows, none. */
 const CheckRows = <T extends object>({
   data,
   checkedRows,
@@ -32,94 +24,68 @@ const CheckRows = <T extends object>({
   unCheck,
   checkAllDataFromDb,
 }: ICheckRows<T>) => {
-  const [selectedItem, setSelectedItem] = useState<number | null>(2)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-  const handleClose = () => {
+  const [selection, setSelection] = useState<Selection>('none')
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const texts = translations?.checkbox
+
+  const options: { key: Selection; title: string; run(): void }[] = [
+    { key: 'all', title: texts?.all || CheckedItems.SELECTED_ALL, run: checkAllDataFromDb },
+    { key: 'visible', title: texts?.allVisible || CheckedItems.SELECTED_VISIBLE, run: () => handleCheckAll(data) },
+    { key: 'none', title: texts?.none || CheckedItems.NONE, run: unCheck },
+  ]
+
+  const select = (option: (typeof options)[number]) => {
+    option.run()
+    setSelection(option.key)
     setAnchorEl(null)
   }
 
-  const [listForDropdown] = useState<object[]>([
-    {
-      id: 1,
-      title: translations?.checkbox.all || CheckedItems.SELECTED_ALL,
-      action: () => {
-        checkAllDataFromDb()
-        setSelectedItem(0)
-      },
-    },
-    {
-      id: 2,
-      title: translations?.checkbox.allVisible || CheckedItems.SELECTED_VISIBLE,
-      action: (data?: T[]) => {
-        handleCheckAll(data)
-        setSelectedItem(1)
-      },
-    },
-    {
-      id: 3,
-      title: translations?.checkbox.none || CheckedItems.NONE,
-      action: () => {
-        unCheck()
-        setSelectedItem(2)
-      },
-    },
-  ])
+  const isChecked = selection === 'all' || (data.length > 0 && checkedRows.length === data.length)
+  const toggle = () => {
+    if (selection === 'none') {
+      handleCheckAll()
+      setSelection('visible')
+    } else {
+      unCheck()
+      setSelection('none')
+    }
+  }
 
   return (
-    <>
-      <div className='G-align-center G-check-all-component'>
-        <Checkbox
-          isCheck={selectedItem === 0 || checkedRows.length === data.length}
-          isDisable={!data.length}
-          onClick={
-            selectedItem === 0 || selectedItem === 1
-              ? () => {
-                  unCheck()
-                  setSelectedItem(2)
-                }
-              : () => {
-                  handleCheckAll()
-                  setSelectedItem(1)
-                }
-          }
-          customClass='G-checkbox'
-        />
-      </div>
-      <div className='G-check-all-dropdown'>
-        <PopUp
-          ActiveIcon={DropdownSvgIcon}
-          style={dropdownStyle}
-          open={open}
-          anchorEl={anchorEl}
-          handleClick={handleClick}
-          handleClose={handleClose}
-        >
-          <ul className='G-dropdown-list'>
-            {listForDropdown.map((item: any, index: any) => {
-              return (
-                <li
-                  key={item.id}
-                  onClick={() => {
-                    item.action(data)
-                    handleClose()
-                  }}
-                  style={{
-                    color: index === selectedItem ? '#4844C5' : 'black',
-                  }}
-                >
-                  {item.title}
-                </li>
-              )
-            })}
-          </ul>
-        </PopUp>
-      </div>
-    </>
+    <div className='brt-select-all'>
+      <Checkbox
+        isCheck={isChecked}
+        isDisable={!data.length}
+        onClick={toggle}
+        customClass='G-checkbox'
+        ariaLabel='Select all rows'
+      />
+      <PopUp
+        ActiveIcon={ChevronDown}
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        handleClick={(event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget)}
+        handleClose={() => setAnchorEl(null)}
+        style={{ padding: 4 }}
+      >
+        <ul className='brt-menu'>
+          {options.map((option) => (
+            <li key={option.key}>
+              <button
+                type='button'
+                role='menuitemradio'
+                aria-checked={selection === option.key}
+                className={`brt-menu__item ${selection === option.key ? 'is-selected' : ''}`}
+                onClick={() => select(option)}
+              >
+                {option.title}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </PopUp>
+    </div>
   )
 }
 
-export default memo(CheckRows)
+export default memo(CheckRows) as <T extends object>(props: ICheckRows<T>) => ReactElement

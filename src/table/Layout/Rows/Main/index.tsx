@@ -42,7 +42,6 @@ interface IMainRows<T extends object> {
   hasOrdering?: boolean
   isLoadedData?: boolean
   getRow?(options: any): void
-  RightSideSelfAction?: (option: number | string) => void
   freezeRow(e: any, option: number): void
   getRowForDropdown(id: RowId): void
   isCheckedRows(id: RowId): boolean
@@ -74,7 +73,6 @@ interface RowContext {
   selectedType: any
   isLoadedData: any
   getRow: any
-  RightSideSelfAction: any
   freezeRow: any
   getRowForDropdown: any
   isCheckedRows: any
@@ -125,7 +123,6 @@ const MainRow = memo(function MainRow({
     selectedType,
     isLoadedData,
     getRow,
-    RightSideSelfAction,
     freezeRow,
     getRowForDropdown,
     isCheckedRows,
@@ -156,13 +153,11 @@ const MainRow = memo(function MainRow({
             index={index}
             freezedRows={freezedRows}
             FreezeIcon={FreezeIcon}
-            links={links}
             rowsFreezeAction={rowsFreezeAction}
             freezeRow={freezeRow}
           />
         ) : null}
       </ul>
-      {/* FREEZED LEFT */}
       <ul
         className={pickBackGroundColor(index)}
         style={{
@@ -182,9 +177,9 @@ const MainRow = memo(function MainRow({
           >
             <Checkbox
               isDisable={selectedType === CheckedItems.SELECTED_ALL}
-              isCheck={isCheckedRows(item.id)}
+              isCheck={selectedType === CheckedItems.SELECTED_ALL || isCheckedRows(item.id)}
               onClick={() => handleCheck(item.id)}
-              customClass={'G-checkbox'}
+              customClass='G-checkbox'
             />
           </li>
         ) : null}
@@ -199,7 +194,6 @@ const MainRow = memo(function MainRow({
           />
         ) : null}
       </ul>
-      {/* MAIN */}
       <ul
         style={{
           flex: 1,
@@ -217,7 +211,7 @@ const MainRow = memo(function MainRow({
           >
             <Checkbox
               isDisable={selectedType === CheckedItems.SELECTED_ALL}
-              isCheck={isCheckedRows(item.id)}
+              isCheck={selectedType === CheckedItems.SELECTED_ALL || isCheckedRows(item.id)}
               onClick={() => handleCheck(item.id)}
               customClass='G-checkbox'
             />
@@ -242,7 +236,6 @@ const MainRow = memo(function MainRow({
           )
         })}
       </ul>
-      {/* FREEZED RIGHT */}
       {freezedRightSideVisible ? (
         <ul
           ref={myRef}
@@ -286,7 +279,6 @@ const MainRow = memo(function MainRow({
                 links={links}
                 freezedRightSide={freezedRightSide}
                 RightSideIcon={RightSideIcon}
-                RightSideSelfAction={RightSideSelfAction}
                 getRowForDropdown={getRowForDropdown}
               />
             </li>
@@ -323,7 +315,6 @@ const MainRows = forwardRef<any, IMainRows<any>>(
       selectedType,
       isLoadedData,
       getRow,
-      RightSideSelfAction,
       freezeRow,
       getRowForDropdown,
       isCheckedRows,
@@ -372,7 +363,6 @@ const MainRows = forwardRef<any, IMainRows<any>>(
       selectedType,
       isLoadedData,
       getRow,
-      RightSideSelfAction,
       freezeRow,
       getRowForDropdown,
       isCheckedRows,

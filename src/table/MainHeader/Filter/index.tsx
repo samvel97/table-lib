@@ -2,7 +2,7 @@ import { Button } from '../../../ui/Button'
 import { Fragment, memo, useState } from 'react'
 import { type IComparisonType, type IFiltersTypes, type ISelect, type ItemFields } from '../../../Models/table.models'
 import NativePopup from '../../../components/NativePopup/NativePopup'
-import FilterSvgIcon from '../../../svgIcons/FilterSvgIcon'
+import { SlidersHorizontal } from 'lucide-react'
 import APIFilter from './FiltersPerColumn/apiFilter'
 import { type ColumnTypeEnums } from '../../../Models/table.enum'
 
@@ -81,87 +81,72 @@ const Filter = ({
   }
 
   return (
-    <div>
-      <NativePopup
-        ActiveIcon={FilterSvgIcon}
-        isOpen={open}
-        popupName={translations?.filterAction?.modalName || 'Filter By'}
-        handleOpen={handleOpen}
-        handleClose={handleClose}
-      >
-        <div style={{ padding: '20px 0', width: 'clamp(330px, 35vw, 553px)' }}>
-          <div style={{ width: '100%' }} className='G-justify-end'>
-            <button
-              type='button'
-              aria-pressed={advancedSettings}
-              className={`brt-link-button ${advancedSettings ? 'is-active' : ''}`}
-              onClick={() => setAdvancedSettings((prev) => !prev)}
-            >
-              {translations?.filterAction?.advanced || 'Advanced'}
-            </button>
-          </div>
-          <ul
-            className='P-Filters'
-            style={{
-              border: 'none',
-              overflowX: 'auto',
-              overflowY: 'auto',
-              maxHeight: '50dvh',
-              padding: '0px 32px 10px 32px',
-            }}
+    <NativePopup
+      ActiveIcon={SlidersHorizontal}
+      badge={filterDataForRequest?.length}
+      isOpen={open}
+      popupName={translations?.filterAction?.modalName || 'Filter By'}
+      handleOpen={handleOpen}
+      handleClose={handleClose}
+    >
+      <div className='brt-filters'>
+        <div className='brt-filters__header'>
+          <span className='brt-filters__title'>{translations?.filterAction?.modalName || 'Filter By'}</span>
+          <button
+            type='button'
+            aria-pressed={advancedSettings}
+            className={`brt-link-button ${advancedSettings ? 'is-active' : ''}`}
+            onClick={() => setAdvancedSettings((prev) => !prev)}
           >
-            {filterColumns?.length ? (
-              filterColumns.map((item: IComparisonType, index) => {
-                return (
-                  <Fragment key={index}>
-                    {filtersTypes?.length &&
-                      filtersTypes.map((type: any) => {
-                        if (item.ColumnType === type.ColumnType)
-                          return (
-                            <Fragment key={item.ColumnName}>
-                              <APIFilter
-                                isLoadingFilters={item.isLoading}
-                                advancedSettings={advancedSettings}
-                                item={item}
-                                data={data}
-                                typeElem={type}
-                                isDisabled={isDisabled}
-                                perColumnTotalCount={perColumnTotalCount}
-                                translations={translations}
-                                handleChangePagePerFilterField={handleChangePagePerFilterField}
-                                checkIsDisabled={checkIsDisabled}
-                                filteredColumn={filterDataForRequest}
-                                perColumnListForFilters={item.options}
-                                getFilteredData={getFilteredData}
-                                filterColumns={filterColumns}
-                              />
-                            </Fragment>
-                          )
-                      })}
-                  </Fragment>
-                )
-              })
-            ) : (
-              <div>{translations?.filterAction?.emptyColumns || 'Add Filters Columns'}</div>
-            )}
-          </ul>
-          <div style={{ padding: 20, borderTop: '1px  solid #F3F6F8' }}>
-            <Button
-              variant='contained'
-              fullWidth
-              disabled={isDisabled}
-              style={{ marginBottom: 8 }}
-              onClick={handleSave}
-            >
-              {translations?.filterAction?.confirmFilters || 'Submit'}
-            </Button>
-            <Button variant='outlined' fullWidth onClick={handleCancel}>
-              {translations?.filterAction?.clearFilters || 'Clear All Filters'}
-            </Button>
-          </div>
+            {translations?.filterAction?.advanced || 'Advanced'}
+          </button>
         </div>
-      </NativePopup>
-    </div>
+        <ul className='P-Filters brt-filters__body'>
+          {filterColumns?.length ? (
+            filterColumns.map((item: IComparisonType, index) => {
+              return (
+                <Fragment key={index}>
+                  {filtersTypes?.length &&
+                    filtersTypes.map((type: any) => {
+                      if (item.ColumnType === type.ColumnType)
+                        return (
+                          <Fragment key={item.ColumnName}>
+                            <APIFilter
+                              isLoadingFilters={item.isLoading}
+                              advancedSettings={advancedSettings}
+                              item={item}
+                              data={data}
+                              typeElem={type}
+                              isDisabled={isDisabled}
+                              perColumnTotalCount={perColumnTotalCount}
+                              translations={translations}
+                              handleChangePagePerFilterField={handleChangePagePerFilterField}
+                              checkIsDisabled={checkIsDisabled}
+                              filteredColumn={filterDataForRequest}
+                              perColumnListForFilters={item.options}
+                              getFilteredData={getFilteredData}
+                              filterColumns={filterColumns}
+                            />
+                          </Fragment>
+                        )
+                    })}
+                </Fragment>
+              )
+            })
+          ) : (
+            <li className='brt-filters__empty'>{translations?.filterAction?.emptyColumns || 'Add Filters Columns'}</li>
+          )}
+        </ul>
+        <div className='brt-filters__footer'>
+          <Button variant='outlined' onClick={handleCancel}>
+            {translations?.filterAction?.clearFilters || 'Clear all'}
+          </Button>
+          <Button variant='contained' disabled={isDisabled} onClick={handleSave}>
+            {translations?.filterAction?.confirmFilters || 'Apply'}
+          </Button>
+        </div>
+      </div>
+    </NativePopup>
   )
 }
 

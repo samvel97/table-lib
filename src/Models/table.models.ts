@@ -224,9 +224,6 @@ export interface IComparisonType {
   isLoading?: boolean
 }
 
-// export interface ITranslations {
-//   EmptyData:
-// }
 export interface IColumnConfig<T extends object> {
   id?: string | number
   columnName?: number | string

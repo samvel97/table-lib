@@ -1,7 +1,6 @@
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
+import { Check } from 'lucide-react'
 import './style.scss'
-
-type CheckboxVariant = 'primary' | 'secondary'
 
 interface ICheckbox {
   isCheck: boolean
@@ -11,24 +10,11 @@ interface ICheckbox {
   /** Accessible name when there is no visible label (e.g. row selection). */
   ariaLabel?: string
   customClass?: string
-  variant?: CheckboxVariant
   children?: ReactNode
 }
 
-/**
- * Custom-styled checkbox. Rendered with `role="checkbox"`, focusable and toggled with Space or Enter,
- * so it works with a keyboard and screen readers (v7 was a clickable div only).
- */
-const Checkbox = ({
-  isCheck,
-  isDisable,
-  onClick,
-  label,
-  ariaLabel,
-  customClass = '',
-  variant = 'primary',
-  children,
-}: ICheckbox) => {
+/** Custom-styled checkbox with `role="checkbox"`, focusable and toggled with Space or Enter. */
+const Checkbox = ({ isCheck, isDisable, onClick, label, ariaLabel, customClass = '', children }: ICheckbox) => {
   const toggle = () => {
     if (!isDisable) onClick?.()
   }
@@ -52,18 +38,16 @@ const Checkbox = ({
       role='checkbox'
       aria-checked={isCheck}
       aria-disabled={isDisable || undefined}
-      aria-label={ariaLabel ?? label}
+      aria-label={ariaLabel ?? label ?? 'Select row'}
       tabIndex={isDisable ? -1 : 0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className={`G-checkbox-component G-inline-flex G-align-center G-justify-start ${customClass}`}
+      className={`brt-checkbox ${isCheck ? 'is-checked' : ''} ${isDisable ? 'is-disabled' : ''} ${customClass}`}
     >
-      <div
-        className={`G-checkbox G-flex G-flex-column ${isDisable || isCheck ? 'G-active-checkbox' : ''} G-checkbox-${variant} ${
-          isDisable ? 'G-disable-checkbox' : ''
-        }`}
-      />
-      {children ?? (label ? <p>{label}</p> : null)}
+      <span className='brt-checkbox__box' aria-hidden='true'>
+        {isCheck ? <Check size={14} strokeWidth={3} /> : null}
+      </span>
+      {children ?? (label ? <span className='brt-checkbox__label'>{label}</span> : null)}
     </div>
   )
 }

@@ -1,163 +1,53 @@
-@use '../../assets/style/variables' as *;
-@use '../../assets/style/mixin' as *;
+@use '../../styles/tokens' as *;
 
-.G-checkbox-component {
-  .G-checkbox {
-    position: relative;
-    transition: $transition;
-    &.G-checkbox-primary {
-      width: 20px;
-      height: 20px;
-      background-color: $white;
-      border: 1px solid #acbcc3;
-      border-radius: 1px;
-      &.G-active-checkbox {
-        background-color: $active-color;
-        border: none;
-        &:before {
-          content: '';
-          position: absolute;
-          background-color: $white;
-          border-radius: 2px;
-          width: 6px;
-          height: 2px;
-          transform: rotate(47deg);
-          top: 50%;
-          left: 20%;
-        }
-        &:after {
-          content: '';
-          position: absolute;
-          background-color: $white;
-          border-radius: 2px;
-          width: 10px;
-          height: 2px;
-          transform: rotate(-40deg);
-          top: 44%;
-          left: 34%;
-        }
-      }
-      &.G-disable-checkbox {
-        cursor: default !important;
-        background-color: rgba(225, 225, 225, 0.6);
-      }
-    }
-    &.G-checkbox-secondary {
-      width: 18px;
-      height: 18px;
-      border: 2px solid $grey-10;
-      border-radius: 3px;
-      transition: $transition;
-      &.G-active-checkbox {
-        position: relative;
-        border-color: transparent;
-        .G-active-checkbox-secondary-bottom,
-        .G-active-checkbox-secondary-top {
-          opacity: 1;
-          visibility: visible;
-        }
-      }
-      .G-active-checkbox-secondary-bottom {
-        height: 10px;
-        width: 18px;
-        border-top: none;
-        border-radius: 0 0 3px 3px;
-        align-items: center;
-        transition: $transition;
-        opacity: 0;
-        visibility: hidden;
-        position: absolute;
-        left: -2px;
-        bottom: -2px;
-        &:after {
-          content: '';
-          width: 2px;
-          height: 2px;
-          position: absolute;
-          right: -2px;
-          top: -1px;
-          border-radius: 3px 3px 0 0;
-          transition: all $transition;
-        }
-      }
-      .G-active-checkbox-secondary-top {
-        height: 8px;
-        width: 9px;
-        border-bottom: none;
-        border-right: none;
-        border-radius: 3px 0 0 0;
-        transition: $transition;
-        background-color: transparent;
-        opacity: 0;
-        visibility: hidden;
-        position: absolute;
-        left: -2px;
-        top: -2px;
-        &:before {
-          content: '';
-          width: 3px;
-          height: 2px;
-          position: absolute;
-          right: -3px;
-          top: -2px;
-          border-radius: 0 3px 3px 0;
-          transition: background-color $transition;
-        }
-      }
-      .G-checkbox-mark {
-        position: absolute;
-        &:before {
-          content: '';
-          position: absolute;
-          left: 4px;
-          top: 3px;
-          width: 14px;
-          height: 2px;
-          border-radius: 30px;
-          transform: rotate(0) scale(0.3);
-          opacity: 0;
-          visibility: hidden;
-          transition: 0.3s;
-        }
-        &:after {
-          content: '';
-          position: absolute;
-          left: 1.7px;
-          top: 5.6px;
-          width: 6px;
-          height: 2px;
-          border-radius: 30px;
-          transform: rotate(0) scale(0.3);
-          opacity: 0;
-          visibility: hidden;
-          transition: 0.3s;
-        }
-        &.G-checkbox-mark-active {
-          &:after {
-            transform: rotate(-491deg) scale(1);
-            opacity: 1;
-            visibility: visible;
-          }
-          &:before {
-            transform: rotate(496deg) scale(1);
-            opacity: 1;
-            visibility: visible;
-          }
-        }
-      }
-      &.G-active-checkbox.G-disable-checkbox {
-        cursor: default !important;
-        background-color: $grey-50;
-      }
-      &.G-disable-checkbox {
-        cursor: default !important;
-        border: 1px solid $grey-50;
-        background-color: $grey-40;
-      }
+.brt-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: none;
+
+    .brt-checkbox__box {
+      box-shadow: 0 0 0 3px t('accent-soft');
+      border-color: t('accent');
     }
   }
-  p {
-    margin-left: 10px;
-    font-size: 16px;
+
+  &.is-disabled {
+    cursor: default;
+  }
+
+  &.is-disabled:not(.is-checked) {
+    opacity: 0.5;
+  }
+}
+
+.brt-checkbox__box {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid t('border-strong');
+  border-radius: 5px;
+  background: t('surface');
+  color: #fff;
+  transition:
+    background-color t('transition'),
+    border-color t('transition'),
+    box-shadow t('transition');
+
+  .brt-checkbox:hover:not(.is-disabled) & {
+    border-color: t('accent');
+  }
+
+  .brt-checkbox.is-checked & {
+    border-color: t('accent');
+    background: t('accent');
   }
 }

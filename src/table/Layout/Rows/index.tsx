@@ -1,7 +1,6 @@
 import type { TableIcon } from '../../../Models/table.models'
 import { type RowId } from '../../../utils/rowId'
 import { forwardRef } from 'react'
-import React from 'react'
 import {
   type IColumnConfig,
   type IColumnConfigStructure,
@@ -38,7 +37,6 @@ interface IRows<T extends object> {
   hasOrdering?: boolean
   isLoadedData?: boolean
   getRow?: (option: any) => void
-  RightSideSelfAction?: (option: number | string) => void
   freezeRow(e: any, option: number): void
   unFreezeRow(e: any, option: number): void
   handleCheck(id: RowId): void
@@ -76,7 +74,6 @@ const Rows = forwardRef<any, IRows<any>>(
       hasOrdering,
       isLoadedData,
       getRow,
-      RightSideSelfAction,
       freezeRow,
       getRowForDropdown,
       isCheckedRows,
@@ -113,7 +110,6 @@ const Rows = forwardRef<any, IRows<any>>(
             hasOrdering={hasOrdering}
             isLoadedData={isLoadedData}
             getRow={getRow}
-            RightSideSelfAction={RightSideSelfAction}
             getRowForDropdown={getRowForDropdown}
             dragDropFreezeRow={dragDropFreezeRow}
             unFreezeRow={unFreezeRow}
@@ -147,7 +143,6 @@ const Rows = forwardRef<any, IRows<any>>(
           hasOrdering={hasOrdering}
           isLoadedData={isLoadedData}
           getRow={getRow}
-          RightSideSelfAction={RightSideSelfAction}
           freezeRow={freezeRow}
           getRowForDropdown={getRowForDropdown}
           isCheckedRows={isCheckedRows}

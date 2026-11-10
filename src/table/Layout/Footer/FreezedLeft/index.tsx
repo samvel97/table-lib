@@ -1,6 +1,5 @@
 import { type IColumnConfigStructure, type IColumnHeaderStructure } from '../../../../Models/table.models'
 import FreezedItems from './FreezedItems'
-import './style.scss'
 import { StructureConfig } from '../../../../Models/table.enum'
 interface IFooterFreezedLeft<T extends object> {
   columnsHeaderStructure: IColumnHeaderStructure
@@ -38,12 +37,9 @@ const FooterFreezedLeft = <T extends object>({
     >
       {isStickyFirstColumn && multipleCheck ? (
         <li
-          className='G-dropdown'
-          style={{
-            backgroundColor: footerColor && footerColor,
-            minWidth: leftFreezedColumnWidth ? `${leftFreezedColumnWidth}px` : 60,
-          }}
-        ></li>
+          className='G-footer-spacer'
+          style={{ backgroundColor: footerColor, minWidth: leftFreezedColumnWidth ?? 60 }}
+        />
       ) : null}
       {columnsHeaderStructure[StructureConfig.Freezed].items.length ? (
         <FreezedItems

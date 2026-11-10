@@ -37,7 +37,6 @@ const useTable = <T extends object>(data: T[], freezedRightSide?: string, RightS
     event.stopPropagation()
     const row = freezedRows[index]
     if (!row) return
-    // v7 used `splice(index, index)`, which removed `index` rows and lost all but the first.
     setFreezedRows((previous) => previous.filter((_, i) => i !== index))
     setUnFreezedRows((previous) => [row, ...previous])
   }
@@ -93,8 +92,13 @@ const useTable = <T extends object>(data: T[], freezedRightSide?: string, RightS
   }
 
   // New data (page change, sorting, filtering): reset rows and selection during render...
+  // Frozen rows that are still in the data stay frozen and are left out of the regular list.
   useSyncOnChange(data, (rows) => {
-    setUnFreezedRows(rows)
+    const rowIds = new Set(rows.map(getRowId))
+    const frozen = freezedRows.filter((row) => rowIds.has(getRowId(row)))
+    const frozenIds = new Set(frozen.map(getRowId))
+    setFreezedRows(frozen)
+    setUnFreezedRows(rows.filter((row) => !frozenIds.has(getRowId(row))))
     setCheckedRows([])
   })
 

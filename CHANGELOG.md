@@ -13,7 +13,10 @@ exists with the same name.
   `@emotion/styled`, `@mui/x-date-pickers` and `dayjs` are no longer needed; the table ships its own small,
   accessible controls (built on `@floating-ui/react`). Apps that use MUI can keep it.
 - **Refreshed look**: rounded bordered container, calmer header, row hover highlight, new filter fields, menus and
-  buttons. The default accent color is unchanged (`#4844c5`); everything is themable through `--brt-*` CSS
+  buttons. The toolbar is rebuilt: select-all checkbox with a menu, Edit / Delete buttons, and outlined Columns,
+  Filters (with an active-filter count) and Download menus. Icons come from [Lucide](https://lucide.dev); the
+  custom SVG icon set is gone. The page-size picker is a native `<select>`, and the default labels are shorter
+  ("Columns", "Download", "Apply", "Clear all"). The default accent color is unchanged (`#4844c5`); everything is themable through `--brt-*` CSS
   variables. Tables in existing apps will look different after upgrading.
 - **Date filters use the browser's native date-time input** instead of the MUI picker. Callbacks still receive
   `Date` objects. The date format follows the user's browser locale, so the internal `locale` setting no longer
@@ -41,6 +44,8 @@ exists with the same name.
 
 ### Fixed
 
+- Frozen rows were shown twice after new `data` arrived (once frozen, once in the list); rows that are no longer in
+  the data are unfrozen.
 - The select-all menu kept the functions and translations from the first render, so "Select all" could select
   stale rows after paging or filtering.
 - With two tables on a page, both read the first table's scroll state (`hasScroll()` used the first
@@ -79,8 +84,8 @@ exists with the same name.
   every prop documented with JSDoc, icon props accept any component (not only `React.memo` ones), new exports:
   `IComparisonType`, `IFiltersTypes`, `IOrdering`, `ISelect`, `IColumnTotalStructure`, `CheckedItems`, `TableIcon`,
   `IProps`, and `IRowActions` (alias of `IrowActions`).
-- Package size: ~190 kB packed / 11 files (v7: ~3.2 MB in 153 files). Runtime dependencies are only
-  `@floating-ui/react`, `@hello-pangea/dnd` and `@tanstack/react-virtual`; the package no longer depends on itself.
+- Package size: ~171 kB packed / 11 files (v7: ~3.2 MB in 153 files). Runtime dependencies are only
+  `@floating-ui/react`, `@hello-pangea/dnd`, `@tanstack/react-virtual` and `lucide-react` (tree-shaken); the package no longer depends on itself.
 - Tooling: Vite 8 library mode, TypeScript 6, ESLint 10 flat config, Prettier 3, Vitest with tests for row state,
   column moves, pagination and date handling, a playground (`npm run dev`) and CI.
 

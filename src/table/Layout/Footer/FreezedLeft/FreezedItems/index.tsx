@@ -1,4 +1,3 @@
-import React from 'react'
 import { StructureConfig } from '../../../../../Models/table.enum'
 import {
   type IColumnConfig,

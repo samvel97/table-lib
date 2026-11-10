@@ -1,12 +1,16 @@
-import { useId, type CSSProperties, type MouseEvent, type ReactElement } from 'react'
+import { useId, type CSSProperties, type ElementType, type MouseEvent, type ReactElement } from 'react'
 import { autoUpdate, flip, offset, shift, useDismiss, useFloating, useInteractions, useRole } from '@floating-ui/react'
 import { FloatingLayer } from '../../ui/FloatingLayer'
-import './style.scss'
 
 interface IPopUp {
   children: ReactElement
-  ActiveIcon?: any
-  DisabledIcon?: any
+  /** Trigger icon; `DisabledIcon`, when given, is shown while the menu is closed. */
+  ActiveIcon?: ElementType
+  DisabledIcon?: ElementType
+  /** Icon after the label, e.g. a chevron. */
+  EndIcon?: ElementType
+  triggerClassName?: string
+  ariaLabel?: string
   modalName?: string
   /** Extra styles for the trigger button. */
   style?: CSSProperties
@@ -24,6 +28,9 @@ const PopUp = ({
   children,
   ActiveIcon,
   DisabledIcon,
+  EndIcon,
+  triggerClassName = '',
+  ariaLabel,
   modalName,
   style,
   checkedLink,
@@ -34,12 +41,12 @@ const PopUp = ({
   handleClick,
   getRowForDropdown,
 }: IPopUp) => {
-  // Unique per instance: every row renders a popup, so fixed ids were duplicated across the page.
   const id = useId()
   const buttonId = `brt-popup-button-${id}`
   const menuId = `brt-popup-menu-${id}`
   // Row dropdowns share one "checked" row; only the matching row's menu is open.
   const isOpen = checkedLink && item ? checkedLink.id === item.id && open : open
+  const Icon = DisabledIcon && !isOpen ? DisabledIcon : ActiveIcon
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -67,23 +74,21 @@ const PopUp = ({
           getRowForDropdown?.(item?.id)
           handleClick(event)
         }}
-        className='brt-popup-trigger'
+        className={`brt-popup-trigger ${triggerClassName}`}
+        aria-label={ariaLabel}
         style={style}
       >
-        <span className='G-center G-popUp-icon'>
-          {ActiveIcon ? (
-            DisabledIcon ? (
-              isOpen ? (
-                <ActiveIcon />
-              ) : (
-                <DisabledIcon />
-              )
-            ) : (
-              <ActiveIcon fill={isOpen ? 'var(--brt-accent)' : 'currentColor'} />
-            )
-          ) : null}
-        </span>
-        {modalName ? <span className={`brt-popup-trigger__label ${isOpen ? 'is-open' : ''}`}>{modalName}</span> : null}
+        {Icon ? (
+          <span className='brt-popup-trigger__icon'>
+            <Icon />
+          </span>
+        ) : null}
+        {modalName ? <span className='brt-popup-trigger__label'>{modalName}</span> : null}
+        {EndIcon ? (
+          <span className={`brt-popup-trigger__icon brt-popup-trigger__chevron ${isOpen ? 'is-open' : ''}`}>
+            <EndIcon />
+          </span>
+        ) : null}
       </button>
       {isOpen ? (
         <FloatingLayer
